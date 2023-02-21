@@ -1,0 +1,16 @@
+{
+  "info": {
+    "progress": {
+      "address": 33583344,
+      "type": "=i2"
+    },
+    "score": {
+      "address": 33583608,
+      "type": "<=i4"
+    },
+    "speed0": {
+      "address": 33583249,
+      "type": "=u2"
+    }
+  }
+}
