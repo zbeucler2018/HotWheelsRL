@@ -14,6 +14,17 @@ Zack Beucler
 - my local dev pip env is requirements.txt
 
 
+### Integration
+- need ubuntu 18
+- variables I want from RAM
+  - [x] track progress
+  - [x] score
+  - [ ] restart cutscene
+  - [ ] speed
+  - [ ] multiplayer rank
+- maybe figure out a way to port the integration UI to ubuntu 22
+
+
 # install retro on ubuntu 22
 
 
