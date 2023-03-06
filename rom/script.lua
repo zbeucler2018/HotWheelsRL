@@ -7,11 +7,11 @@ totalFrames = 0
 
 function isDone()
 	-- taking too long	
-	if totalFrames >= 10000 then
-		return true
-	end
+	--if totalFrames >= 10000 then
+	--	return true
+	--end
 
-	local single_lap = 330
+	local single_lap = 320
 	local three_laps = 950
 	local LAP_LIMIT = single_lap
 	if data.progress >= LAP_LIMIT then
