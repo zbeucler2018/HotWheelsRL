@@ -21,8 +21,6 @@ Zack Beucler
   - [x] score
   - [ ] restart cutscene
   - [x] speed
-     - multiply `speed` by `0.702` and round to the nearest int to get an estimate of the speed
-     - should make my own env to wrap a basic env to do this calculation
   - [ ] multiplayer rank
   - [ ] figure out a way to port the integration UI to ubuntu 22
      - Probably libretro or QT is out of date
