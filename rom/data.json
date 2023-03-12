@@ -8,7 +8,7 @@
       "address": 33583608,
       "type": "<=i4"
     },
-    "speed0": {
+    "speed": {
       "address": 33583249,
       "type": "=u2"
     }
