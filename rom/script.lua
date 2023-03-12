@@ -1,15 +1,13 @@
 
 -- By: Zack Beucler
 
-totalFrames = 0
-
-
-
 function isDone()
-	-- taking too long	
-	--if totalFrames >= 10000 then
-	--	return true
-	--end
+	-- local gameover_val = 33583680
+	-- if data.score > gameover_val then
+	-- 	return true
+	-- else
+	-- 	return false
+	-- end
 
 	local single_lap = 320
 	local three_laps = 950
@@ -32,18 +30,5 @@ function calculateReward()
 	else
 		return 0
 	end
-	totalFrames = totalFrames + 1
 end
 
-
-
-
-
-function dino_multi_isDone()
-	local gameover_val = 33583680
-	if data.score > gameover_val then
-		return true
-	else
-		return false
-	end
-end
