@@ -24,3 +24,15 @@ Zack Beucler
   - [ ] multiplayer rank
   - [ ] figure out a way to port the integration UI to ubuntu 22
      - Probably libretro or QT is out of date
+
+
+make sure that `import_rom_into_retro.bash` has executable permissions
+
+
+
+# Dev env
+- docker container
+  - dev container if possible
+- jyupter notebook
+- tensorboard
+- automatically import hotwheels into retro
