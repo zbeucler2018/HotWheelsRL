@@ -11,9 +11,6 @@ Zack Beucler
 - [Exploration Strategies for Deep Reinforcement Learning](https://github.com/pkumusic/E-DRL)
 
 
-- my local dev pip env is requirements.txt
-
-
 ### Integration
 - need ubuntu 18
 - variables I want from RAM
@@ -25,14 +22,5 @@ Zack Beucler
   - [ ] figure out a way to port the integration UI to ubuntu 22
      - Probably libretro or QT is out of date
 
-
-make sure that `import_rom_into_retro.bash` has executable permissions
-
-
-
 # Dev env
-- docker container
-  - dev container if possible
-- jyupter notebook
-- tensorboard
-- automatically import hotwheels into retro
+- run `start.bash` and open the url in browser
