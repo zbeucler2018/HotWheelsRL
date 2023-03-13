@@ -1,5 +1,6 @@
 # rom file
 *.gba
+*sfc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
