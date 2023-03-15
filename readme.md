@@ -27,6 +27,12 @@ Zack Beucler
   - [ ] penalizes bumping into the wall repeatdly
 - dev env
   - [ ] import rom into retro in dockerfile if possible
+- bonus
+  - [ ] leaderboard site
+    - leaderboard for fastest lap amoung all agents of different algorithms
+      - has a video of the race for each entry and some info about the agent
+    - mkdocs + github pages
+     
 
 
 
