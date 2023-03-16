@@ -12,7 +12,9 @@ RUN pip install \
         git+https://github.com/Stable-Baselines-Team/stable-baselines3-contrib@feat/gymnasium-support \
         git+https://github.com/MatPoliquin/stable-retro.git \
         jupyter \
+        notebook \
         matplotlib \
-        opencv-python
+        opencv-python \
+        moviepy
 
-ENTRYPOINT [ "jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root" ]
+#ENTRYPOINT [ "jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root" ]
