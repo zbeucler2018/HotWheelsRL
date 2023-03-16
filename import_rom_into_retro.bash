@@ -5,7 +5,7 @@
 
 set -e
 
-source_path="/home/rom"
+source_path="$(pwd)/rom"
 link_name="HotWheelsStuntTrackChallenge-gba"
 lib_path="/usr/local/lib/python3.8/site-packages/retro/data/stable"
 
