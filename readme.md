@@ -28,6 +28,8 @@ Zack Beucler
   - [ ] throw terminated on restart (screen goes white)
   - [x] encourages tricks
   - [ ] penalizes bumping into the wall repeatdly
+  - [ ] wrapper that normalizes boost
+    - vertify if semi boost can be activated
 - dev env
   - [ ] import rom into retro in dockerfile if possible
 - bonus
