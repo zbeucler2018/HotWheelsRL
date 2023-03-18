@@ -12,18 +12,21 @@ Zack Beucler
 
 ## Todo
 - benchmarks
+  - [ ] algorithms
+    - [ ] [A2C](https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html)
+    - [ ] [PPO](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html)
+    - [ ] [TRPO](https://sb3-contrib.readthedocs.io/en/master/modules/trpo.html)
+    - [ ] [Exploration Strategies for Deep Reinforcement Learning](https://github.com/pkumusic/E-DRL)
+    - [ ] NEAT
   - [ ] random agent
   - [ ] NPCs (of different difficulties if possible)
   - [ ] human
-  - [ ] (bonus) make static site for leaderboards 
-      - record video of each agent
-      - save model
-      - save time
-      - use github pages to host it
+
 - wrappers
   - [ ] removes 'SELECT' and 'START' buttons from action space
-  - [ ] encourages less frames / timesteps
-  - [ ] encourages tricks
+  - [ ] ~~encourages less frames / timesteps~~ encourage higher speed
+  - [ ] throw terminated on restart (screen goes white)
+  - [x] encourages tricks
   - [ ] penalizes bumping into the wall repeatdly
 - dev env
   - [ ] import rom into retro in dockerfile if possible
@@ -51,6 +54,7 @@ Zack Beucler
   - [x] score
   - [ ] restart cutscene
   - [x] speed
+  - [x] boost
   - [ ] multiplayer rank
   - [ ] figure out a way to port the integration UI to ubuntu 22
     - libretro or QT is out of date (?)
