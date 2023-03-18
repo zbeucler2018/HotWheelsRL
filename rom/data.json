@@ -11,6 +11,18 @@
     "speed": {
       "address": 33583249,
       "type": "=u2"
+    },
+    "boost": {
+      "address": 2007094,
+      "type": "=i4"
+    },
+    "lap": {
+      "address": 20070e2,
+      "type": "|i1"
+    },
+    "hit wall?": {
+      "address": 20070e0,
+      "type": "><n4"
     }
   }
 }
