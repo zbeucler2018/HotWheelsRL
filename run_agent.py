@@ -127,7 +127,7 @@ for ep in range(args.episodes):
         if args.record_gif:
             frames.append(observation)
 
-        print(f"\n==Episode {ep}==", f"total reward: {total_reward}",f"progress: {info['progress']}, sep="\n")
+        print(f"\n==Episode {ep}==", f"total reward: {total_reward}",f"progress: {info['progress']}", sep="\n")
 
 
         if terminated or truncated:
