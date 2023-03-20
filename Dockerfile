@@ -15,6 +15,9 @@ RUN pip install \
         notebook \
         matplotlib \
         opencv-python \
-        moviepy
+        moviepy \
+        wandb \
+        tensorboard \
+        imageio
 
 #ENTRYPOINT [ "jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root" ]
