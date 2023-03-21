@@ -8,6 +8,7 @@ set -e
 source_path="$(pwd)/rom"
 link_name="HotWheelsStuntTrackChallenge-gba"
 lib_path="/usr/local/lib/python3.8/site-packages/retro/data/stable"
+#lib_path="env/lib/python3.8/site-packages/retro/data/stable"
 
 if [ ! -d "$source_path" ]; then
     echo "$source_path is not a valid directory."

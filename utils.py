@@ -2,6 +2,8 @@ import sys
 import subprocess
 import os
 import shutil
+import site
+import importlib
 
 def print_args_table(args):
   """
@@ -39,6 +41,21 @@ def gba_file_exists():
       print(f"{rom_path} not found in {source_path}")
       return False
   return True
+
+
+
+def get_package_location(package_name):
+    """
+    Returns the installation location of a pip package.
+    """
+    try:
+        importlib.import_module(package_name)
+        package_location = site.getsitepackages()
+        package_location = [p for p in package_location if package_name in p][0]
+        return package_location
+    except ImportError:
+        print(f"Package '{package_name}' is not installed.")
+
   
 
 

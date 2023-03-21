@@ -4,10 +4,10 @@ import time
 from utils import print_args_table
 
 parser = argparse.ArgumentParser(description='HotWheels evaluation')
-parser.add_argument('--model_filename', type=str, help='Name of the file the model is named', required=True)
-parser.add_argument('--algo', type=str, help='What algorithm the model is (PPO, A2C, TRPO)')
+parser.add_argument('--filename', type=str, help='Filename of model to import', required=True)
+parser.add_argument('--algo', type=str, help='What algorithm to use (PPO, A2C, TRPO)')
 parser.add_argument('--episodes', type=int, help='Total episodes for the agent to run', required=True)
-parser.add_argument('--max_episode_steps', type=int, help='Learning rate for model', default=15_000)
+parser.add_argument('--max_episode_steps', type=int, help='The maximum amount of steps per episode when training', default=15_000)
 parser.add_argument('--render_mode', type=str, help='render type for observation', default='rgb_array', choices=['rgb_array', 'human'])
 parser.add_argument('--record_gif', action='store_true', help='Record a video of the agent', default=False)
 parser.add_argument('--grayscale', action='store_true', help='whether to use grayscale', default=False)
