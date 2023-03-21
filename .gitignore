@@ -3,6 +3,9 @@
 *sfc
 
 
+# tensorboard logs
+logs/
+
 # wandb
 wandb.txt
 wandb/
