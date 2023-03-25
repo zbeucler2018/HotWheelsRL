@@ -104,7 +104,7 @@ else:
 
 
 
-model = algo.load(args.model_filename)
+model = algo.load(args.filename)
 
 
 
