@@ -48,48 +48,25 @@ except Exception as e:
     print("Could not import ML libraries")
     raise e
 
+from HotWheelsEnv import FixSpeed, DoTricks, SingleActionEnv, TerminateOnCrash, NorrmalizeBoost
+def make_env(env):
+    env = FixSpeed(env)
+    env = DoTricks(env)
+    env = SingleActionEnv(env)
+    env = TerminateOnCrash(env)
+    env = NorrmalizeBoost(env)
+    env = FrameStack(env, num_stack=4)
+    return env
 
-class FixSpeed(gym.Wrapper):
-    """
-    Fixes env bug so the speed is accurate
-    """
-    def __init__(self, env):
-        super().__init__(env)
-
-    def step(self, action):
-        observation, reward, terminated, truncated, info = self.env.step(action)
-        info['speed'] *= 0.702
-        return observation, reward, terminated, truncated, info
-  
-
-class DoTricks(gym.Wrapper):
-    """
-    Encourages the agent to do tricks (increase score) (+0.1)
-    """
-    def __init__(self, env, score_boost=1.0):
-        super().__init__(env)
-        self.prev_score = None
-        self.score_boost = score_boost
-        
-    def step(self, action):
-        observation, reward, terminated, truncated, info = self.env.step(action)
-        # Get the current score and compare it with the previous score
-        curr_score = info.get('score')
-        if curr_score is not None and self.prev_score is not None:
-            if curr_score > self.prev_score:
-                reward += (1 / (curr_score - self.prev_score))
-        # Update the previous score
-        self.prev_score = curr_score
-        return observation, reward, terminated, truncated, info
     
 
 env = retro.make("HotWheelsStuntTrackChallenge-gba", render_mode=args.render_mode)
+env = make_env(env)
 env = TimeLimit(env, max_episode_steps=args.max_episode_steps)
 if args.grayscale:
     env = GrayScaleObservation(env, keep_dim=True)
 # if args.vec:
 #     env = make_vec_env(env, n_envs=4)
-#FrameStack
 
 
 # check if valid env
