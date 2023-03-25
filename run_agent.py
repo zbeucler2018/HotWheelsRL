@@ -24,15 +24,11 @@ try:
     import numpy as np
     import gymnasium as gym
     from gymnasium.wrappers import GrayScaleObservation, TimeLimit, FrameStack
-    #from gymnasium.utils.save_video import save_video
 
     from stable_baselines3.common.env_checker import check_env
     from stable_baselines3.common.env_util import make_vec_env
     from stable_baselines3 import PPO, A2C
     from sb3_contrib import TRPO
-
-    import wandb
-    from wandb.integration.sb3 import WandbCallback
 
 except Exception as e:
     print("Could not import ML libraries")
