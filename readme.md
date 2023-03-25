@@ -14,7 +14,11 @@ Zack Beucler
 - benchmarks
   - [ ] algorithms
     - [ ] [A2C](https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html)
+      - [ ] mlp
+      - [ ] cnn
     - [ ] [PPO](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html)
+      - [ ] mlp
+      - [ ] cnn
     - [ ] [TRPO](https://sb3-contrib.readthedocs.io/en/master/modules/trpo.html)
     - [ ] [Exploration Strategies for Deep Reinforcement Learning](https://github.com/pkumusic/E-DRL)
     - [ ] NEAT
@@ -23,9 +27,9 @@ Zack Beucler
   - [ ] human
 
 - wrappers
-  - [ ] removes 'SELECT' and 'START' buttons from action space
+  - [x] removes 'SELECT' and 'START' buttons from action space
   - [ ] ~~encourages less frames / timesteps~~ encourage higher speed
-  - [ ] throw terminated on restart (screen goes white)
+  - [x] throw terminated on restart (screen goes white)
   - [x] encourages tricks
   - [ ] penalizes bumping into the wall repeatdly
   - [ ] wrapper that normalizes boost
@@ -54,7 +58,7 @@ Zack Beucler
 - variables I want from RAM
   - [x] track progress
   - [x] score
-  - [ ] restart cutscene
+  - [x] restart cutscene
   - [x] speed
   - [x] boost
   - [ ] multiplayer rank
