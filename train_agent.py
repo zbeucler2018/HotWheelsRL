@@ -49,20 +49,18 @@ except Exception as e:
     raise e
 
 from HotWheelsEnv import FixSpeed, DoTricks, SingleActionEnv, TerminateOnCrash, NorrmalizeBoost
-def make_env(env):
-    env = FixSpeed(env)
-    env = DoTricks(env)
-    env = SingleActionEnv(env)
-    env = TerminateOnCrash(env)
-    env = NorrmalizeBoost(env)
-    env = FrameStack(env, num_stack=4)
-    return env
+
 
     
 
 env = retro.make("HotWheelsStuntTrackChallenge-gba", render_mode=args.render_mode)
-env = make_env(env)
+#env = make_env(env)
 env = TimeLimit(env, max_episode_steps=args.max_episode_steps)
+env = FixSpeed(env)
+env = DoTricks(env)
+#env = SingleActionEnv(env)
+env = TerminateOnCrash(env)
+#env = NorrmalizeBoost(env)
 if args.grayscale:
     env = GrayScaleObservation(env, keep_dim=True)
 # if args.vec:
