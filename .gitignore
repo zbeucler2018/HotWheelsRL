@@ -2,6 +2,10 @@
 *.gba
 *sfc
 
+# testing
+test.ipynb
+test.py
+
 
 # tensorboard logs
 logs/
