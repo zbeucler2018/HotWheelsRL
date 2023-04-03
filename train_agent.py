@@ -34,7 +34,6 @@ try:
     import retro
     import gymnasium as gym
     from gymnasium.wrappers import GrayScaleObservation, TimeLimit, FrameStack
-    from gymnasium.utils.save_video import save_video
 
     from stable_baselines3.common.env_checker import check_env
     from stable_baselines3.common.env_util import make_vec_env
@@ -83,7 +82,7 @@ elif args.algo == "a2c":
 elif args.algo == "trpo":
     algo = TRPO
 else:
-    raise
+    raise ValueError(f"Invalid algorithm specified  {args.algo}")
 
 
 
@@ -91,7 +90,7 @@ run = wandb.init(
     project="sb3-hotwheels",
     config=config,
     sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-    monitor_gym=True,  # auto-upload the videos of agents playing the game
+    monitor_gym=True  # auto-upload the videos of agents playing the game
     #save_code=True,  # optional (broken)
     #run_name=f"{args.algo}-{wandb.run.id}"
 )
@@ -104,6 +103,7 @@ try:
         callback=WandbCallback(
             gradient_save_freq=100,
             model_save_path=f"models/{run.id}",
+            model_save_freq=50_000,
             verbose=2,
         ),
     )
