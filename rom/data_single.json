@@ -17,11 +17,11 @@
       "type": "=i4"
     },
     "lap": {
-      "address": 20070e2,
+      "address": 33583330,
       "type": "|i1"
     },
     "hit wall?": {
-      "address": 20070e0,
+      "address": 33583328,
       "type": "><n4"
     }
   }
