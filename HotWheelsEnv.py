@@ -1,15 +1,108 @@
 
+from enum import Enum
+from typing import Tuple, Union, Any
 
-try:
-    import numpy as np
-    import gymnasium as gym
-    from retro.retro_env import RetroEnv
-except Exception as e:
-    print("Could not import ML libraries")
-    raise e
+import numpy as np
+
+import gymnasium as gym
+from gymnasium.core import Env
+from gymnasium.wrappers import GrayScaleObservation, TimeLimit, FrameStack
+
+import retro
+
+
+class GameStates(Enum):
+    SINGLE = 'dino_single.state',
+    SINGLE_POINTS = 'dino_single_points.state',
+    MULTIPLAYER = 'dino_multiplayer.state'
+
+class Actions(Enum):
+    MULTI = 0,
+    DISCRETE = 1
+
+class CustomEnvs(Enum):
+    BARE_DISCRETE = -2,
+    BARE_MULTI = -1, # no wrappers or anything
+
+    MULTI = 1,
+    MULTI_FRAMESTACK = 2
+    MULTI_GRAY = 3,
+    MULTI_GRAY_FRAMESTACK = 4,
+
+    DISCRETE = 5,
+    DISCRETE_FRAMESTACK = 6,
+    DISCRETE_GRAY = 7,
+    DISCRETE_GRAY_FRAMESTACK = 8
 
 
 
+class HotWheelsEnv():
+
+    def __init__(self, multiplayer=True):
+        self.is_multiplayer = multiplayer
+        self.game_state: GameStates = GameStates.MULTIPLAYER if self.is_multiplayer else GameStates.SINGLE 
+        self.max_episode_steps = 25_000 
+
+        self.WRAPPER_CONFIGS = {
+            CustomEnvs.BARE_DISCRETE: [SingleActionEnv],
+            CustomEnvs.BARE_MULTI: [],
+            CustomEnvs.MULTI: [TimeLimit, TerminateOnCrash, FixSpeed],
+            CustomEnvs.MULTI_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, FrameStack],
+            CustomEnvs.MULTI_GRAY: [TimeLimit, TerminateOnCrash, FixSpeed, GrayScaleObservation],
+            CustomEnvs.MULTI_GRAY_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, GrayScaleObservation, FrameStack],
+            CustomEnvs.DISCRETE: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv],
+            CustomEnvs.DISCRETE_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv, FrameStack],
+            CustomEnvs.DISCRETE_GRAY: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv, GrayScaleObservation],
+            CustomEnvs.DISCRETE_GRAY_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv, GrayScaleObservation, FrameStack]
+        }
+
+
+    def make_base_env(self):
+        """
+        Makes a basic, protected env
+        """
+        env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state)
+        env = TimeLimit(self.env, max_episode_steps=self.max_episode_steps)
+        env = TerminateOnCrash(self.env)   
+        env = FixSpeed(self.env)
+        #env = NorrmalizeBoost(env)
+        return env
+
+    def make_custom_env(self, env: Union[str, Env], custom_env: CustomEnvs) -> Env:
+        """
+        Returns a custom Hot Wheels environment based on the specified wrapper configuration.
+
+        Args:
+            env: The name of the environment to create or an existing environment instance.
+            custom_env: The wrapper configuration to apply.
+
+        Returns:
+            The configured environment.
+        """
+        if isinstance(env, str):
+            env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=GameStates.MULTIPLAYER.value if self.is_multiplayer else GameStates.SINGLE.value)
+
+        wrapper_configs = self.WRAPPER_CONFIGS[custom_env]
+        for wrapper_class in wrapper_configs:
+            env = wrapper_class(env)
+
+        return env
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 class Discretizer(gym.ActionWrapper):
     """
     Wrap a gym environment and make it use discrete actions.
@@ -44,23 +137,6 @@ class Discretizer(gym.ActionWrapper):
         arr = self.action(action)
         # convert boolean array to multibinary
         return arr.astype(np.uint8)
-
-
-
-
-
-def make_hot_wheels_env(env):
-    env = FixSpeed(env)
-    env = DoTricks(env)
-    env = SingleActionEnv(env)
-    env = TerminateOnCrash(env)
-    env = NorrmalizeBoost(env)
-    return env
-
-
-
-
-
 
 
 class FixSpeed(gym.Wrapper):
@@ -100,7 +176,6 @@ class DoTricks(gym.Wrapper):
         # Update the previous score
         self.prev_score = curr_score
         return observation, reward, terminated, truncated, info
-    
 
 
 class SingleActionEnv(Discretizer):
@@ -172,23 +247,31 @@ class NorrmalizeBoost(gym.Wrapper):
 
 
 
+"""
+monitor wrapper : speed, progress, score, rank, etc
+"""
+class PenalizeHittingWall(gym.wrapper):
+    """
+    Penalizes the agent for hitting a wall during the episode.
+    The current way to detect a wall collision is if the speed is 
+    zero while progressing through the episode
+    """
 
+    def __init__(self, env, penalty):
+        super().__init__(env, penalty=1)
+        self.hit_wall_penality = penalty
 
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        if info['speed'] < 5 and info['progress'] > 0:
+            reward -= self.hit_wall_penality
+        return observation, reward, terminated, truncated, info
     
+
+
+
+
+
+
+
 
