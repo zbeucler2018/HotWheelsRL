@@ -41,53 +41,53 @@ class HotWheelsEnv():
     def __init__(self, multiplayer=True):
         self.is_multiplayer = multiplayer
         self.game_state: GameStates = GameStates.MULTIPLAYER if self.is_multiplayer else GameStates.SINGLE 
-        self.max_episode_steps = 25_000 
+        self.max_episode_steps = 25_000
 
-        self.WRAPPER_CONFIGS = {
-            CustomEnvs.BARE_DISCRETE: [SingleActionEnv],
-            CustomEnvs.BARE_MULTI: [],
-            CustomEnvs.MULTI: [TimeLimit, TerminateOnCrash, FixSpeed],
-            CustomEnvs.MULTI_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, FrameStack],
-            CustomEnvs.MULTI_GRAY: [TimeLimit, TerminateOnCrash, FixSpeed, GrayScaleObservation],
-            CustomEnvs.MULTI_GRAY_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, GrayScaleObservation, FrameStack],
-            CustomEnvs.DISCRETE: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv],
-            CustomEnvs.DISCRETE_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv, FrameStack],
-            CustomEnvs.DISCRETE_GRAY: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv, GrayScaleObservation],
-            CustomEnvs.DISCRETE_GRAY_FRAMESTACK: [TimeLimit, TerminateOnCrash, FixSpeed, SingleActionEnv, GrayScaleObservation, FrameStack]
-        }
-
-
-    def make_base_env(self):
+    def make_base_env(self) -> Env:
         """
-        Makes a basic, protected env
+        Returns a basic, protected env
         """
-        env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state)
-        env = TimeLimit(self.env, max_episode_steps=self.max_episode_steps)
-        env = TerminateOnCrash(self.env)   
-        env = FixSpeed(self.env)
+        env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state.value)
+        env = TimeLimit(env, max_episode_steps=self.max_episode_steps)
+        env = TerminateOnCrash(env)
+        env = FixSpeed(env)
         #env = NorrmalizeBoost(env)
         return env
 
-    def make_custom_env(self, env: Union[str, Env], custom_env: CustomEnvs) -> Env:
+    def make_custom_env(self, custom_env: CustomEnvs) -> Env:
         """
         Returns a custom Hot Wheels environment based on the specified wrapper configuration.
 
         Args:
-            env: The name of the environment to create or an existing environment instance.
             custom_env: The wrapper configuration to apply.
 
         Returns:
             The configured environment.
         """
-        if isinstance(env, str):
-            env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=GameStates.MULTIPLAYER.value if self.is_multiplayer else GameStates.SINGLE.value)
+        if custom_env in (CustomEnvs.BARE_DISCRETE, CustomEnvs.BARE_MULTI):
+            env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state.value)
+        else:
+            env = self.make_base_env()
 
-        wrapper_configs = self.WRAPPER_CONFIGS[custom_env]
-        for wrapper_class in wrapper_configs:
-            env = wrapper_class(env)
-
+        if custom_env in (CustomEnvs.BARE_MULTI, CustomEnvs.MULTI):
+            return env
+        elif custom_env == CustomEnvs.MULTI_FRAMESTACK:
+            env = FrameStack(env, num_stack=4)
+        elif custom_env == CustomEnvs.MULTI_GRAY:
+            env = GrayScaleObservation(env, keep_dim=True)
+        elif custom_env == CustomEnvs.MULTI_GRAY_FRAMESTACK:
+            env = GrayScaleObservation(env, keep_dim=True)
+            env = FrameStack(env, num_stack=4)
+        elif custom_env in (CustomEnvs.DISCRETE, CustomEnvs.DISCRETE_FRAMESTACK, CustomEnvs.DISCRETE_GRAY, CustomEnvs.DISCRETE_GRAY_FRAMESTACK):
+            env = SingleActionEnv(env)
+            if custom_env in (CustomEnvs.DISCRETE_FRAMESTACK, CustomEnvs.DISCRETE_GRAY_FRAMESTACK):
+                env = FrameStack(env, num_stack=4)
+            if custom_env in (CustomEnvs.DISCRETE_GRAY, CustomEnvs.DISCRETE_GRAY_FRAMESTACK):
+                env = GrayScaleObservation(env, keep_dim=True)
+        else:
+            raise NotImplementedError("How did you get here?")
+        
         return env
-
 
 
 
@@ -250,7 +250,7 @@ class NorrmalizeBoost(gym.Wrapper):
 """
 monitor wrapper : speed, progress, score, rank, etc
 """
-class PenalizeHittingWall(gym.wrapper):
+class PenalizeHittingWall(gym.Wrapper):
     """
     Penalizes the agent for hitting a wall during the episode.
     The current way to detect a wall collision is if the speed is 
