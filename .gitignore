@@ -2,6 +2,9 @@
 *.gba
 *sfc
 
+# whl
+*.whl
+
 # testing
 test.ipynb
 test.py
