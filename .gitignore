@@ -16,6 +16,7 @@ logs/
 # wandb
 wandb.txt
 wandb/
+.wandb_key
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
