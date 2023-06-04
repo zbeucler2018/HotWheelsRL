@@ -6,28 +6,19 @@ from typing import Optional, Union
 import wandb
 from gymnasium.core import Env
 from gymnasium.wrappers import TimeLimit
-
 #from sb3_contrib import TRPO
-from stable_baselines3 import A2C, PPO
+from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.env_checker import check_env
-
 from wandb.integration.sb3 import WandbCallback
 
 from HotWheelsEnv import HotWheelsEnv
 
 
-
-"""
-
-Figure out how to get the type of hotwheels env into the wandb config so it can be saved in the wandb run
-
-"""
-
-
 class ValidAlgos(Enum):
     PPO = "ppo"
     A2C = "A2C"
-    TRPO = "TRPO"
+    DQN = "DQN"
+    #TRPO = "TRPO"
 
 
 @dataclass
@@ -118,6 +109,15 @@ class Trainer:
                 learning_rate=modelConfig.learning_rate,
                 gamma=modelConfig.gamma
             )
+        elif algo == ValidAlgos.DQN:
+            model = DQN(
+                modelConfig.policy,
+                self.env,
+                verbose=1,
+                tensorboard_log=modelConfig.tensorboard_log_path, 
+                learning_rate=modelConfig.learning_rate,
+                gamma=modelConfig.gamma
+            )
         elif algo == ValidAlgos.TRPO:
             raise NotImplementedError(f"TRPO not setup yet")
         else:
@@ -146,20 +146,3 @@ class Trainer:
     def resume_training(self):
         """ Resumes the training of a model """
         raise NotImplementedError(f"Method isnt written yet")
-    
-
-
-
-
-wb_config = WandbConfig(
-    api_key="",
-    model_save_freq=15_000
-)
-
-m_config = ModelConfig(
-    policy="CnnPolicy",
-    total_training_timesteps=1_000_000,
-    learning_rate=0.0003,
-    gamma=0.95
-)
-
