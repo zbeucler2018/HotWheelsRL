@@ -1,14 +1,12 @@
 
 from enum import Enum
-from typing import Tuple, Union, Any
-
-import numpy as np
+from typing import Any, Tuple, Union
 
 import gymnasium as gym
-from gymnasium.core import Env
-from gymnasium.wrappers import GrayScaleObservation, TimeLimit, FrameStack
-
+import numpy as np
 import retro
+from gymnasium.core import Env
+from gymnasium.wrappers import FrameStack, GrayScaleObservation, TimeLimit
 
 
 class GameStates(Enum):
@@ -41,14 +39,12 @@ class HotWheelsEnv():
     def __init__(self, multiplayer=True):
         self.is_multiplayer = multiplayer
         self.game_state: GameStates = GameStates.MULTIPLAYER if self.is_multiplayer else GameStates.SINGLE 
-        self.max_episode_steps = 25_000
 
     def make_base_env(self) -> Env:
         """
         Returns a basic, protected env
         """
         env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state.value)
-        env = TimeLimit(env, max_episode_steps=self.max_episode_steps)
         env = TerminateOnCrash(env)
         env = FixSpeed(env)
         #env = NorrmalizeBoost(env)
@@ -247,9 +243,6 @@ class NorrmalizeBoost(gym.Wrapper):
 
 
 
-"""
-monitor wrapper : speed, progress, score, rank, etc
-"""
 class PenalizeHittingWall(gym.Wrapper):
     """
     Penalizes the agent for hitting a wall during the episode.
