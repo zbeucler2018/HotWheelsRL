@@ -32,7 +32,7 @@ class CustomEnv():
 
 
 
-class HotWheelsEnv():
+class HotWheelsEnvFactory():
 
     @staticmethod    
     def make_env(env_config: CustomEnv) -> Env:
