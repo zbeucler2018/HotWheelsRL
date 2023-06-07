@@ -62,7 +62,7 @@ class ModelConfig:
 class Trainer:
     """ Trains an agent """
 
-    def __init__(self, env: Union[Env, HotWheelsEnv]) -> None:
+    def __init__(self, env: Union[Env]) -> None:
         try:
             check_env(env, skip_render_check=True)
         except Exception as err:
