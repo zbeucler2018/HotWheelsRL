@@ -9,81 +9,60 @@ from gymnasium.core import Env
 from gymnasium.wrappers import FrameStack, GrayScaleObservation, TimeLimit
 
 
+from dataclasses import dataclass
+
+
+
 class GameStates(Enum):
     SINGLE = 'dino_single.state',
     SINGLE_POINTS = 'dino_single_points.state',
     MULTIPLAYER = 'dino_multiplayer.state'
 
-class Actions(Enum):
-    MULTI = 0,
-    DISCRETE = 1
 
-class CustomEnvs(Enum):
-    BARE_DISCRETE = -2,
-    BARE_MULTI = -1, # no wrappers or anything
+@dataclass
+class CustomEnv():
+    game_state: GameStates
+    discrete: bool
+    multibinary: bool
+    framestack: bool
+    grayscale: bool
+    raw: bool
 
-    MULTI = 1,
-    MULTI_FRAMESTACK = 2
-    MULTI_GRAY = 3,
-    MULTI_GRAY_FRAMESTACK = 4,
 
-    DISCRETE = 5,
-    DISCRETE_FRAMESTACK = 6,
-    DISCRETE_GRAY = 7,
-    DISCRETE_GRAY_FRAMESTACK = 8
 
 
 
 class HotWheelsEnv():
 
-    def __init__(self, multiplayer=True):
-        self.is_multiplayer = multiplayer
-        self.game_state: GameStates = GameStates.MULTIPLAYER if self.is_multiplayer else GameStates.SINGLE 
-
-    def make_base_env(self) -> Env:
+    @staticmethod    
+    def make_env(env_config: CustomEnv) -> Env:
         """
-        Returns a basic, protected env
+        Returns a env of a specific configuration
         """
-        env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state.value)
-        env = TerminateOnCrash(env)
-        env = FixSpeed(env)
-        #env = NorrmalizeBoost(env)
-        return env
 
-    def make_custom_env(self, custom_env: CustomEnvs) -> Env:
-        """
-        Returns a custom Hot Wheels environment based on the specified wrapper configuration.
-
-        Args:
-            custom_env: The wrapper configuration to apply.
-
-        Returns:
-            The configured environment.
-        """
-        if custom_env in (CustomEnvs.BARE_DISCRETE, CustomEnvs.BARE_MULTI):
-            env = retro.make(game="HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", state=self.game_state.value)
-        else:
-            env = self.make_base_env()
-
-        if custom_env in (CustomEnvs.BARE_MULTI, CustomEnvs.MULTI):
-            return env
-        elif custom_env == CustomEnvs.MULTI_FRAMESTACK:
-            env = FrameStack(env, num_stack=4)
-        elif custom_env == CustomEnvs.MULTI_GRAY:
-            env = GrayScaleObservation(env, keep_dim=True)
-        elif custom_env == CustomEnvs.MULTI_GRAY_FRAMESTACK:
-            env = GrayScaleObservation(env, keep_dim=True)
-            env = FrameStack(env, num_stack=4)
-        elif custom_env in (CustomEnvs.DISCRETE, CustomEnvs.DISCRETE_FRAMESTACK, CustomEnvs.DISCRETE_GRAY, CustomEnvs.DISCRETE_GRAY_FRAMESTACK):
-            env = SingleActionEnv(env)
-            if custom_env in (CustomEnvs.DISCRETE_FRAMESTACK, CustomEnvs.DISCRETE_GRAY_FRAMESTACK):
-                env = FrameStack(env, num_stack=4)
-            if custom_env in (CustomEnvs.DISCRETE_GRAY, CustomEnvs.DISCRETE_GRAY_FRAMESTACK):
-                env = GrayScaleObservation(env, keep_dim=True)
-        else:
-            raise NotImplementedError("How did you get here?")
+        if env_config.discrete and env_config.multibinary:
+            raise Exception(f"HotWheelsEnv action space can only be either discrete or multibinary")
         
-        return env
+        _env = retro.make(
+            game="HotWheelsStuntTrackChallenge-gba", 
+            render_mode="rgb_array", 
+            state=env_config.game_state.value
+        )
+
+        if env_config.discrete:
+            _env = SingleActionEnv(_env)
+
+        if env_config.grayscale:
+            _env = GrayScaleObservation(_env, keep_dim=True)
+
+        if env_config.framestack:
+            _env = FrameStack(_env, num_stack=4)
+
+        if not env_config.raw:
+            _env = TerminateOnCrash(_env)
+            _env = FixSpeed(_env)
+
+        return _env
 
 
 
