@@ -114,6 +114,44 @@ class Discretizer(gym.ActionWrapper):
         return arr.astype(np.uint8)
 
 
+class SingleActionEnv(Discretizer):
+    """
+    Restricts the agent's actions to a a single button per action
+            
+            []
+            , ['B']
+            , ['A']
+            , ['UP']
+            , ['DOWN']
+            , ['LEFT']
+            , ['RIGHT']
+            , ['L', 'R']
+    """
+
+    def __init__(self, env):
+        super().__init__(env=env, 
+                        buttons=env.unwrapped.buttons, 
+                        combos=[  
+            []
+            , ['B']
+            , ['A']
+            , ['UP']
+            , ['DOWN']
+            , ['LEFT']
+            , ['RIGHT']
+            , ['L', 'R']
+        ])
+
+        self.original_env = env
+    
+    def get_discrete_button_meaning(self, action):
+        """
+        get button from discrete action
+        """
+        multibinary_action = self.discrete_to_multibinary(action)
+        return self.original_env.get_action_meaning(multibinary_action)        
+
+
 class FixSpeed(gym.Wrapper):
     """
     Fixes env bug so the speed is accurate
@@ -151,44 +189,6 @@ class DoTricks(gym.Wrapper):
         # Update the previous score
         self.prev_score = curr_score
         return observation, reward, terminated, truncated, info
-
-
-class SingleActionEnv(Discretizer):
-    """
-    Restricts the agent's actions to a a single button per action
-            
-            []
-            , ['B']
-            , ['A']
-            , ['UP']
-            , ['DOWN']
-            , ['LEFT']
-            , ['RIGHT']
-            , ['L', 'R']
-    """
-
-    def __init__(self, env):
-        super().__init__(env=env, 
-                        buttons=env.unwrapped.buttons, 
-                        combos=[  
-            []
-            , ['B']
-            , ['A']
-            , ['UP']
-            , ['DOWN']
-            , ['LEFT']
-            , ['RIGHT']
-            , ['L', 'R']
-        ])
-
-        self.original_env = env
-    
-    def get_discrete_button_meaning(self, action):
-        """
-        get button from discrete action
-        """
-        multibinary_action = self.discrete_to_multibinary(action)
-        return self.original_env.get_action_meaning(multibinary_action)
 
 
 class TerminateOnCrash(gym.Wrapper):
