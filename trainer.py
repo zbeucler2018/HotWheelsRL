@@ -31,8 +31,8 @@ class WandbConfig:
         gradient_save_freq: ???
     """
     model_save_freq: int
-    model_save_path: Union[str, None]
     hot_wheels_env_type: CustomEnv
+    model_save_path: Union[str, None] = None
     project_key: str = "sb3-hotwheels"
     verbose: int = 2
     #gradient_save_freq: int = 100 # TODO: Figure what what this dos and what data type it needs
@@ -62,7 +62,7 @@ class ModelConfig:
 class Trainer:
     """ Trains an agent """
 
-    def __init__(self, env: Union[Env]) -> None:
+    def __init__(self, env: Env) -> None:
         try:
             check_env(env, skip_render_check=True)
         except Exception as err:
