@@ -11,7 +11,7 @@ from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.env_checker import check_env
 from wandb.integration.sb3 import WandbCallback
 
-from HotWheelsEnv import HotWheelsEnv
+from HotWheelsEnv import CustomEnv
 
 
 class ValidAlgos(Enum):
@@ -32,7 +32,7 @@ class WandbConfig:
     """
     model_save_freq: int
     model_save_path: Union[str, None]
-    hot_wheels_env_type: HotWheelsEnv
+    hot_wheels_env_type: CustomEnv
     project_key: str = "sb3-hotwheels"
     verbose: int = 2
     #gradient_save_freq: int = 100 # TODO: Figure what what this dos and what data type it needs
