@@ -18,7 +18,7 @@ Zack Beucler
       - has a video of the race for each entry and some info about the agent
     - mkdocs + github pages
      
-
+**MUST HAVE A `data.json` FILE**
 
 
 ## Resources
