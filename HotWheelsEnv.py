@@ -14,8 +14,8 @@ from dataclasses import dataclass
 
 
 class GameStates(Enum):
-    SINGLE = 'dino_single.state',
-    SINGLE_POINTS = 'dino_single_points.state',
+    SINGLE = 'dino_single.state'
+    SINGLE_POINTS = 'dino_single_points.state'
     MULTIPLAYER = 'dino_multiplayer.state'
 
 
