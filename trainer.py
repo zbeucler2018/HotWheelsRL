@@ -62,23 +62,20 @@ class ModelConfig:
 class Trainer:
     """ Trains an agent """
 
-    def __init__(self, env: Env) -> None:
+
+
+    @staticmethod
+    def train(self, env: Env, algo: ValidAlgos, modelConfig: ModelConfig, wandbConfig: WandbConfig) -> None:
+        """ Trains an agent using the given configs and algo """
+
+        # validate env
         try:
             check_env(env, skip_render_check=True)
         except Exception as err:
             print(f"Cannot train agent. Enviroment is invalid")
             env.close()
             raise err
-        self.env = env
-
-
-
-    def train(self, algo: ValidAlgos, modelConfig: ModelConfig, wandbConfig: WandbConfig) -> None:
-        """ Trains an agent using the given configs and algo """
-
-        # validate algo
-        if algo not in ValidAlgos:
-            raise Exception(f"{algo.value} is not a valid algo")
+        
         
         # set up wandb monitoring
         _run = wandb.init(
@@ -88,13 +85,16 @@ class Trainer:
             )
         
         # add a TimeLimit
-        env = TimeLimit(env, max_episode_steps=modelConfig.max_episode_steps)
+        _env = TimeLimit(
+            env, 
+            max_episode_steps=modelConfig.max_episode_steps
+            )
 
         # make model
         if algo == ValidAlgos.PPO:
             model = PPO(
                 modelConfig.policy, 
-                self.env, 
+                _env, 
                 verbose=1, 
                 tensorboard_log=modelConfig.tensorboard_log_path, 
                 learning_rate=modelConfig.learning_rate,
@@ -103,7 +103,7 @@ class Trainer:
         elif algo == ValidAlgos.A2C:
             model = A2C(
                 modelConfig.policy,
-                self.env,
+                _env,
                 verbose=1,
                 tensorboard_log=modelConfig.tensorboard_log_path, 
                 learning_rate=modelConfig.learning_rate,
@@ -112,7 +112,7 @@ class Trainer:
         elif algo == ValidAlgos.DQN:
             model = DQN(
                 modelConfig.policy,
-                self.env,
+                _env,
                 verbose=1,
                 tensorboard_log=modelConfig.tensorboard_log_path, 
                 learning_rate=modelConfig.learning_rate,
@@ -139,7 +139,7 @@ class Trainer:
         #     self.env.close()
         #     raise err
         finally:
-            self.env.close()
+            _env.close()
             _run.finish()
 
 
