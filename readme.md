@@ -28,3 +28,18 @@ Zack Beucler
 - [stable-baselines3-contrib](https://github.com/Stable-Baselines-Team/stable-baselines3-contrib)
 - [Exploration Strategies for Deep Reinforcement Learning](https://github.com/pkumusic/E-DRL)
 - [stable-retro](https://github.com/Farama-Foundation/stable-retro)
+
+
+
+|              | discrete | multidiscrete | multibinary | 
+| ------------ | -------- | ------------- | ----------- |
+| PPO          | ✅       | ✅            | ✅          |
+| A2C          | ✅       | ✅            | ✅          |
+| DQN          | ✅       | ❌            | ❌          |
+| HER          | ✅       | ❌            | ❌          |
+| QR-DQN       | ✅       | ❌            | ❌          |
+| RecurrentPPO | ✅       | ✅            | ✅          |
+| TRPO         | ✅       | ✅            | ✅          |
+| Maskable PPO | ✅       | ✅            | ✅          |
+| ARS          | ✅       | ❌            | ❌          |
+
