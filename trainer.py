@@ -65,7 +65,7 @@ class Trainer:
 
 
     @staticmethod
-    def train(self, env: Env, algo: ValidAlgos, modelConfig: ModelConfig, wandbConfig: WandbConfig) -> None:
+    def train(env: Env, algo: ValidAlgos, modelConfig: ModelConfig, wandbConfig: WandbConfig) -> None:
         """ Trains an agent using the given configs and algo """
 
         # validate env
