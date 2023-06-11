@@ -8,7 +8,7 @@ from gymnasium.core import Env
 from gymnasium.wrappers import FrameStack, GrayScaleObservation
 from retro import Actions
 
-from gym_wrappers import FixSpeed, SingleActionEnv, TerminateOnCrash
+from gym_wrappers import FixSpeed, SingleActionEnv, TerminateOnCrash, EncourageTricks, NorrmalizeBoost
 
 
 class GameStates(Enum):
@@ -23,9 +23,10 @@ class CustomEnv():
     game_state: GameStates
     framestack: bool
     grayscale: bool
-    raw: bool
-    action_space: bool = Actions.FILTERED
+    action_space: Actions = Actions.FILTERED
     strict_action_space: bool = False
+    encourage_tricks: bool = False
+
 
 
 
@@ -45,6 +46,10 @@ class HotWheelsEnvFactory():
             state=env_config.game_state.value,
             use_restricted_actions=env_config.action_space
         )
+        
+        _env = TerminateOnCrash(_env)
+        _env = FixSpeed(_env)
+        # _env = NormalizeBoost(_env)
 
         if env_config.strict_action_space:
             _env = SingleActionEnv(_env)
@@ -55,18 +60,8 @@ class HotWheelsEnvFactory():
         if env_config.framestack:
             _env = FrameStack(_env, num_stack=4)
 
-        if not env_config.raw:
-            _env = TerminateOnCrash(_env)
-            _env = FixSpeed(_env)
+        if env_config.encourage_tricks:
+            _env = EncourageTricks(_env)
+
 
         return _env
-
-
-
-
-
-
-
-
-
-

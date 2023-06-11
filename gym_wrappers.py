@@ -92,7 +92,7 @@ class FixSpeed(gym.Wrapper):
         return observation, reward, terminated, truncated, info
 
 
-class DoTricks(gym.Wrapper):
+class EncourageTricks(gym.Wrapper):
     """
     Encourages the agent to do tricks (increase score)
     
@@ -148,7 +148,6 @@ class NorrmalizeBoost(gym.Wrapper):
         return observation, reward, terminated, truncated, info
 
 
-
 class PenalizeHittingWall(gym.Wrapper):
     """
     Penalizes the agent for hitting a wall during the episode.
@@ -165,12 +164,3 @@ class PenalizeHittingWall(gym.Wrapper):
         if info['speed'] < 5 and info['progress'] > 0:
             reward -= self.hit_wall_penality
         return observation, reward, terminated, truncated, info
-    
-
-
-
-
-
-
-
-
