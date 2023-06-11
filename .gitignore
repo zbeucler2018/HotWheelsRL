@@ -1,3 +1,6 @@
+# videos
+*.mp4
+
 # rom file
 *.gba
 *sfc
