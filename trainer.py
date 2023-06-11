@@ -143,6 +143,17 @@ class Trainer:
             _run.finish()
 
 
-    def resume_training(self):
+    def resume_training(self, saved_model_path: str, modelConfig: ModelConfig, wandbConfig: WandbConfig) -> None:
         """ Resumes the training of a model """
-        raise NotImplementedError(f"Method isnt written yet")
+        #raise NotImplementedError()
+    
+        if not saved_model_path.endswith(".zip"):
+            raise Exception(f"saved model must be a .zip file")
+        
+        
+        # https://stable-baselines3.readthedocs.io/en/master/guide/save_format.html
+        # model = PPO.load("ppo_cartpole")
+        # model.learn(...)
+        
+        
+        
