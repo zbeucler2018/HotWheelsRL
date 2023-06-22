@@ -21,9 +21,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: idk
-        run: echo "${PWD}"
-
       - name: Install system packages
         run: |
           sudo apt-get update
@@ -49,8 +46,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: t/home/runner/work/HotWheelsRL/HotWheelsRLstable-retro/dist/*.whl
-          asset_name: mything
+          file: t/home/runner/work/HotWheelsRL/HotWheelsRLstable-retro/dist/stable_retro-0.9.0-cp310-cp310-linux_x86_64.whl
+          asset_name: stable_retro-0.9.0-cp310-cp310-linux_x86_64.whl
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is my release text"
