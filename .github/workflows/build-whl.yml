@@ -24,33 +24,33 @@ jobs:
       - name: idk
         run: echo "${PWD}"
 
-      # - name: Install system packages
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install git cmake capnproto zlib1g-dev g++ build-essential python3-dev python3-pip pkg-config libzip-dev software-properties-common libbz2-dev
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install git cmake capnproto zlib1g-dev g++ build-essential python3-dev python3-pip pkg-config libzip-dev software-properties-common libbz2-dev
 
-      # - name: Install pip packages
-      #   run: |
-      #     python -m pip install --upgrade pip cmake wheel setuptools
+      - name: Install pip packages
+        run: |
+          python -m pip install --upgrade pip cmake wheel setuptools
 
-      # - name: Clone retro
-      #   run: git clone https://github.com/zbeucler2018/stable-retro.git stable-retro
+      - name: Clone retro
+        run: git clone https://github.com/zbeucler2018/stable-retro.git stable-retro
 
-      # - name: Build wheel
-      #   run: |
-      #     cd stabl-retro
-      #     python_header_path=$(python3-config --cflags | awk -F '-I' '{print $2}' | awk '{print $1}')
-      #     cmake . -DBUILD_TESTS=ON -DBUILD_MANYLINUX=ON -DPYTHON_INCLUDE_DIR=$python_header_path
-      #     python setup.py -q build_ext -i -j3
-      #     make -j3
-      #     python setup.py bdist_wheel
+      - name: Build wheel
+        run: |
+          cd /home/runner/work/HotWheelsRL/HotWheelsRL/stable-retro/
+          python_header_path=$(python3-config --cflags | awk -F '-I' '{print $2}' | awk '{print $1}')
+          cmake . -DBUILD_TESTS=ON -DBUILD_MANYLINUX=ON -DPYTHON_INCLUDE_DIR=$python_header_path
+          python setup.py -q build_ext -i -j3
+          make -j3
+          python setup.py bdist_wheel
 
-      # - name: Upload binaries to release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: target/release/mything
-      #     asset_name: mything
-      #     tag: ${{ github.ref }}
-      #     overwrite: true
-      #     body: "This is my release text"
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: t/home/runner/work/HotWheelsRL/HotWheelsRLstable-retro/dist/*.whl
+          asset_name: mything
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is my release text"
