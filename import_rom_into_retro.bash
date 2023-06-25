@@ -6,7 +6,7 @@
 set -e
 
 source_path="$(pwd)/rom"
-link_name="HotWheelsStuntTrackChallenge-gba"
+link_name="HotWheelsStuntTrackChallenge-GbAdvance"
 #lib_path="/usr/local/lib/python3.8/site-packages/retro/data/stable"
 lib_path="env/lib/python3.10/site-packages/retro/data/stable" # if working with a venv
 
@@ -31,4 +31,4 @@ ln -s "$source_path" "$dest_path"
 echo "Created symlink: $dest_path -> $source_path"
 
 # import into the library
-python -m retro.import "$source_path"
+# python -m retro.import "$source_path"

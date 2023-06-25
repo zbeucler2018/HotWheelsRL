@@ -41,7 +41,7 @@ class HotWheelsEnvFactory():
         """
         
         _env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
+            game="HotWheelsStuntTrackChallenge-GbAdvance", 
             render_mode="rgb_array", 
             state=env_config.game_state.value,
             use_restricted_actions=env_config.action_space
