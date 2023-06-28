@@ -21,6 +21,9 @@ wandb.txt
 wandb/
 .wandb_key
 
+# misc
+aaahhh.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
