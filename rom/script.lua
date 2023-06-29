@@ -26,7 +26,7 @@ function calculateReward()
 	if current_progress > previous_progress then
 		local delta = current_progress - previous_progress
 		previous_progress = current_progress
-		return delta
+		return delta * 10
 	else
 		return 0
 	end

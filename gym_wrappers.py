@@ -95,7 +95,6 @@ class FixSpeed(gym.Wrapper):
 class EncourageTricks(gym.Wrapper):
     """
     Encourages the agent to do tricks (increase score)
-    
     """
     def __init__(self, env, score_boost=1.0, use_dynamic_reward=True):
         super().__init__(env)
@@ -110,7 +109,7 @@ class EncourageTricks(gym.Wrapper):
         if curr_score is not None and self.prev_score is not None:
             if curr_score > self.prev_score:
                 if self.use_dynamic_reward:
-                    reward += (1 / (curr_score - self.prev_score))
+                    reward += (curr_score - self.prev_score) / 100
                 else:
                     reward += self.score_boost
         # Update the previous score
