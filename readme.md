@@ -43,3 +43,11 @@ Zack Beucler
 | Maskable PPO | ✅       | ✅            | ✅          |
 | ARS          | ✅       | ❌            | ❌          |
 
+
+
+# Reward function
+- math is probably formatted wrong
+
+\sum_{i=1}^n ((progress_{i} - progress_{i-1} ) * 10) + ( \Delta{score} / 100 )
+
+  - `n` : Total time steps
