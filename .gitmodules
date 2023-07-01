@@ -1,0 +1,3 @@
+[submodule "stable-retro"]
+	path = stable-retro
+	url = https://github.com/zbeucler2018/stable-retro
