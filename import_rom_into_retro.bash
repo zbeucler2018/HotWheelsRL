@@ -31,4 +31,4 @@ ln -s "$source_path" "$dest_path"
 echo "Created symlink: $dest_path -> $source_path"
 
 # import into the library
-# python -m retro.import "$source_path"
+python3 -m retro.import "$source_path"

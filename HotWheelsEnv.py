@@ -17,6 +17,7 @@ from gym_wrappers import (
 
 
 class GameStates(Enum):
+    """Possible game states"""
     SINGLE = "dino_single.state"
     SINGLE_POINTS = "dino_single_points.state"
     MULTIPLAYER = "dino_multiplayer.state"
