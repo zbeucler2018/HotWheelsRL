@@ -54,7 +54,7 @@ class ModelConfig:
     policy: str
     total_training_timesteps: int
     tensorboard_log_path: str = f"{os.getcwd()}/logs"
-    learning_rate: Union[float, int] = 0.000001
+    learning_rate: Union[float, int, None] = None
     max_episode_steps: int = 25_000
     gamma: float = 0.99
 
@@ -64,17 +64,18 @@ class Trainer:
 
     @staticmethod
     def train(
-        env: Env, algo: ValidAlgos, modelConfig: ModelConfig, wandbConfig: WandbConfig
+        env: Env, algo: ValidAlgos, modelConfig: ModelConfig, wandbConfig: WandbConfig, skip_env_check: bool=False
     ) -> None:
         """Trains an agent using the given configs and algo"""
 
         # validate env
-        try:
-            check_env(env, skip_render_check=True)
-        except Exception as err:
-            print(f"Cannot train agent. Enviroment is invalid")
-            env.close()
-            raise err
+        if skip_env_check:
+            try:
+                check_env(env, skip_render_check=True)
+            except Exception as err:
+                print(f"Cannot train agent. Enviroment is invalid")
+                env.close()
+                raise err
 
         # set up wandb monitoring
         _run = wandb.init(
@@ -93,7 +94,7 @@ class Trainer:
                 _env,
                 verbose=1,
                 tensorboard_log=modelConfig.tensorboard_log_path,
-                learning_rate=modelConfig.learning_rate,
+                learning_rate=0.0003 if modelConfig.learning_rate is None else modelConfig.learning_rate,
                 gamma=modelConfig.gamma,
             )
         elif algo == ValidAlgos.A2C:
@@ -102,7 +103,7 @@ class Trainer:
                 _env,
                 verbose=1,
                 tensorboard_log=modelConfig.tensorboard_log_path,
-                learning_rate=modelConfig.learning_rate,
+                learning_rate=0.0007 if modelConfig.learning_rate is None else modelConfig.learning_rate,
                 gamma=modelConfig.gamma,
             )
         elif algo == ValidAlgos.DQN:
@@ -111,7 +112,7 @@ class Trainer:
                 _env,
                 verbose=1,
                 tensorboard_log=modelConfig.tensorboard_log_path,
-                learning_rate=modelConfig.learning_rate,
+                learning_rate=0.0001 if modelConfig.learning_rate is None else modelConfig.learning_rate,
                 gamma=modelConfig.gamma,
             )
         elif algo == ValidAlgos.TRPO:
