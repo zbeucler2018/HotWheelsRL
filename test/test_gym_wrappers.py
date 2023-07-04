@@ -2,15 +2,18 @@ import unittest
 
 import retro
 
-
-from HotWheelsEnv import GameStates, FixSpeed, DoTricks, TerminateOnCrash, NorrmalizeBoost, SingleActionEnv
-
-
-
+from HotWheelsEnv import (
+    GameStates,
+    FixSpeed,
+    DoTricks,
+    TerminateOnCrash,
+    NorrmalizeBoost,
+    SingleActionEnv,
+)
 
 
 class TestGameStates(unittest.TestCase):
-    """ Tests if a env can be created with each GameState """
+    """Tests if a env can be created with each GameState"""
 
     def tearDown(self):
         self.env.close()
@@ -18,24 +21,24 @@ class TestGameStates(unittest.TestCase):
 
     def test_dino_single(self):
         self.env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
-            render_mode="rgb_array", 
-            state=GameStates.SINGLE.value
+            game="HotWheelsStuntTrackChallenge-gba",
+            render_mode="rgb_array",
+            state=GameStates.SINGLE.value,
         )
 
     def test_dino_single_points(self):
         self.env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
-            render_mode="rgb_array", 
-            state=GameStates.SINGLE_POINTS.value
+            game="HotWheelsStuntTrackChallenge-gba",
+            render_mode="rgb_array",
+            state=GameStates.SINGLE_POINTS.value,
         )
 
     @unittest.skip(f"Skip until retro can take different data.json filenames")
     def test_dino_multi(self):
         self.env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
-            render_mode="rgb_array", 
-            state=GameStates.MULTIPLAYER.value
+            game="HotWheelsStuntTrackChallenge-gba",
+            render_mode="rgb_array",
+            state=GameStates.MULTIPLAYER.value,
         )
 
 
@@ -43,12 +46,11 @@ from retro import Actions
 
 
 class TestWrappers(unittest.TestCase):
-
     def setUp(self):
         self.env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
-            render_mode="rgb_array", 
-            state=GameStates.SINGLE.value
+            game="HotWheelsStuntTrackChallenge-gba",
+            render_mode="rgb_array",
+            state=GameStates.SINGLE.value,
         )
         _, _ = self.env.reset(seed=42)
 
@@ -71,13 +73,13 @@ class TestWrappers(unittest.TestCase):
         random_action = self.env.action_space.sample()
         observation, reward, terminated, truncated, info = self.env.step(random_action)
 
-    @unittest.skip('the change to data.json isnt working (doesnt detect boost entry)')
+    @unittest.skip("the change to data.json isnt working (doesnt detect boost entry)")
     def test_NorrmalizeBoost(self):
         self.env = NorrmalizeBoost(self.env)
         random_action = self.env.action_space.sample()
         observation, reward, terminated, truncated, info = self.env.step(random_action)
 
-    @unittest.skip('broken')
+    @unittest.skip("broken")
     def test_SingleActionEnv(self):
         self.env = SingleActionEnv(self.env)
         random_action = self.env.action_space.sample()
@@ -87,10 +89,10 @@ class TestWrappers(unittest.TestCase):
         self.env.close()
         self.env = None
         self.env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
-            render_mode="rgb_array", 
+            game="HotWheelsStuntTrackChallenge-gba",
+            render_mode="rgb_array",
             state=GameStates.SINGLE.value,
-            use_restricted_actions=Actions.DISCRETE
+            use_restricted_actions=Actions.DISCRETE,
         )
         _, _ = self.env.reset(seed=42)
 
@@ -101,12 +103,5 @@ class TestWrappers(unittest.TestCase):
         # print(self.env.action_to_array(random_action))
 
 
-    
-
-
-
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Tuple, Union
@@ -8,7 +7,13 @@ from gymnasium.core import Env
 from gymnasium.wrappers import FrameStack, GrayScaleObservation
 from retro import Actions
 
-from gym_wrappers import FixSpeed, SingleActionEnv, TerminateOnCrash, EncourageTricks, NorrmalizeBoost
+from gym_wrappers import (
+    FixSpeed,
+    SingleActionEnv,
+    TerminateOnCrash,
+    EncourageTricks,
+    NorrmalizeBoost,
+)
 
 
 class GameStates(Enum):
@@ -18,8 +23,9 @@ class GameStates(Enum):
 
 
 @dataclass
-class CustomEnv():
-    """ Interface to make a HotWheels env """
+class CustomEnv:
+    """Interface to make a HotWheels env"""
+
     game_state: GameStates
     framestack: bool
     grayscale: bool
@@ -28,25 +34,20 @@ class CustomEnv():
     encourage_tricks: bool = False
 
 
-
-
-
-
-class HotWheelsEnvFactory():
-
-    @staticmethod    
+class HotWheelsEnvFactory:
+    @staticmethod
     def make_env(env_config: CustomEnv) -> Env:
         """
         Returns a env of a specific configuration
         """
-        
+
         _env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba", 
-            render_mode="rgb_array", 
+            game="HotWheelsStuntTrackChallenge-gba",
+            render_mode="rgb_array",
             state=env_config.game_state.value,
-            use_restricted_actions=env_config.action_space
+            use_restricted_actions=env_config.action_space,
         )
-        
+
         _env = TerminateOnCrash(_env)
         _env = FixSpeed(_env)
         # _env = NormalizeBoost(_env)
@@ -62,6 +63,5 @@ class HotWheelsEnvFactory():
 
         if env_config.encourage_tricks:
             _env = EncourageTricks(_env)
-
 
         return _env

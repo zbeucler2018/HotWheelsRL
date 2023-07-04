@@ -1,4 +1,3 @@
-
 import gymnasium as gym
 import numpy as np
 from gymnasium.core import Env
@@ -31,7 +30,7 @@ class Discretizer(gym.ActionWrapper):
         convert discrete action to boolean array
         """
         return self._decode_discrete_action[action].copy()
-    
+
     def discrete_to_multibinary(self, action):
         """
         converts discrete value to multibinary array
@@ -44,7 +43,7 @@ class Discretizer(gym.ActionWrapper):
 class SingleActionEnv(Discretizer):
     """
     Restricts the agent's actions to a a single button per action
-            
+
             []
             , ['B']
             , ['A']
@@ -56,39 +55,42 @@ class SingleActionEnv(Discretizer):
     """
 
     def __init__(self, env):
-        super().__init__(env=env, 
-                        buttons=env.unwrapped.buttons, 
-                        combos=[  
-            []
-            , ['B']
-            , ['A']
-            , ['UP']
-            , ['DOWN']
-            , ['LEFT']
-            , ['RIGHT']
-            , ['L', 'R']
-        ])
+        super().__init__(
+            env=env,
+            buttons=env.unwrapped.buttons,
+            combos=[
+                [],
+                ["B"],
+                ["A"],
+                ["UP"],
+                ["DOWN"],
+                ["LEFT"],
+                ["RIGHT"],
+                ["L", "R"],
+            ],
+        )
 
         self.original_env = env
-    
+
     def get_discrete_button_meaning(self, action):
         """
         get button from discrete action
         """
         multibinary_action = self.discrete_to_multibinary(action)
-        return self.original_env.get_action_meaning(multibinary_action)        
+        return self.original_env.get_action_meaning(multibinary_action)
 
 
 class FixSpeed(gym.Wrapper):
     """
     Fixes env bug so the speed is accurate
     """
+
     def __init__(self, env):
         super().__init__(env)
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        info['speed'] *= 0.702
+        info["speed"] *= 0.702
         return observation, reward, terminated, truncated, info
 
 
@@ -96,16 +98,17 @@ class EncourageTricks(gym.Wrapper):
     """
     Encourages the agent to do tricks (increase score)
     """
+
     def __init__(self, env, score_boost=1.0, use_dynamic_reward=True):
         super().__init__(env)
         self.prev_score = None
         self.score_boost = score_boost
         self.use_dynamic_reward = use_dynamic_reward
-        
+
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         # Get the current score and compare it with the previous score
-        curr_score = info.get('score')
+        curr_score = info.get("score")
         if curr_score is not None and self.prev_score is not None:
             if curr_score > self.prev_score:
                 if self.use_dynamic_reward:
@@ -121,6 +124,7 @@ class TerminateOnCrash(gym.Wrapper):
     """
     A wrapper that ends the episode if the mean of the observation is above a certain threshold
     """
+
     def __init__(self, env, threshold=238):
         super().__init__(env)
         self.crash_restart_threshold = threshold
@@ -131,26 +135,27 @@ class TerminateOnCrash(gym.Wrapper):
         if mean_obs > self.crash_restart_threshold:
             terminated = True
         return observation, reward, terminated, truncated, info
-    
+
 
 class NorrmalizeBoost(gym.Wrapper):
     """
     Normalizes the raw boost variable. True if boost is avaliable, false if not
     """
+
     def __init__(self, env):
         super().__init__(env)
         self.full_boost_quantity = 980
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        info['boost'] = (True if info['boost'] == self.full_boost_quantity else False)
+        info["boost"] = True if info["boost"] == self.full_boost_quantity else False
         return observation, reward, terminated, truncated, info
 
 
 class PenalizeHittingWall(gym.Wrapper):
     """
     Penalizes the agent for hitting a wall during the episode.
-    The current way to detect a wall collision is if the speed is 
+    The current way to detect a wall collision is if the speed is
     zero while progressing through the episode
     """
 
@@ -160,6 +165,6 @@ class PenalizeHittingWall(gym.Wrapper):
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        if info['speed'] < 5 and info['progress'] > 0:
+        if info["speed"] < 5 and info["progress"] > 0:
             reward -= self.hit_wall_penality
         return observation, reward, terminated, truncated, info
