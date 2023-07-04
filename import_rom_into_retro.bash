@@ -5,8 +5,8 @@
 
 set -e
 
-source_path="$(pwd)/rom"
-link_name="HotWheelsStuntTrackChallenge-GbAdvance"
+source_path="$(pwd)/HotWheelsStuntTrackChallenge-gba"
+link_name="HotWheelsStuntTrackChallenge-gba"
 #lib_path="/usr/local/lib/python3.8/site-packages/retro/data/stable"
 lib_path="env/lib/python3.10/site-packages/retro/data/stable" # if working with a venv
 
