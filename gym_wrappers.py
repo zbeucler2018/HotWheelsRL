@@ -99,11 +99,9 @@ class EncourageTricks(gym.Wrapper):
     Encourages the agent to do tricks (increase score)
     """
 
-    def __init__(self, env, score_boost=1.0, use_dynamic_reward=True):
+    def __init__(self, env):
         super().__init__(env)
         self.prev_score = None
-        self.score_boost = score_boost
-        self.use_dynamic_reward = use_dynamic_reward
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
@@ -111,10 +109,7 @@ class EncourageTricks(gym.Wrapper):
         curr_score = info.get("score")
         if curr_score is not None and self.prev_score is not None:
             if curr_score > self.prev_score:
-                if self.use_dynamic_reward:
-                    reward += 1 / (curr_score - self.prev_score) 
-                else:
-                    reward += self.score_boost
+                reward += 1 / (curr_score - self.prev_score) 
         # Update the previous score
         self.prev_score = curr_score
         return observation, reward, terminated, truncated, info
@@ -122,7 +117,8 @@ class EncourageTricks(gym.Wrapper):
 
 class TerminateOnCrash(gym.Wrapper):
     """
-    A wrapper that ends the episode if the mean of the observation is above a certain threshold
+    A wrapper that ends the episode if the mean of the observation is above a certain threshold.
+    FYI: The screen will turn completely white when restarting.
     """
 
     def __init__(self, env, threshold=238):

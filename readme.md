@@ -46,8 +46,18 @@ Zack Beucler
 
 
 # Reward function
-- math is probably formatted wrong
+- math is probably formatted wrong but idc
 
-\sum_{i=1}^n ((progress_{i} - progress_{i-1} ) * 10) + ( \Delta{score} / 100 )
+```math
+\sum_{i=1}^{n} (progress_i - progress_{i-1}) + (1 / (score_i - score_{i-1}))
+```
 
-  - `n` : Total time steps
+  - `n` : Total time steps in episode
+  - In my mind, this should encourage the bot to make forward progress and score points. I had to normalize the score reward since its usually around ~1000
+    - should figure out how to encourage the bot to complete laps faster
+
+
+#### Experimental reward function
+- train 3 laps
+- `+10` for completing a lap
+- `+0.1` or `+0.01` for increasing speed
