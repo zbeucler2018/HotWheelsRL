@@ -112,7 +112,7 @@ class EncourageTricks(gym.Wrapper):
         if curr_score is not None and self.prev_score is not None:
             if curr_score > self.prev_score:
                 if self.use_dynamic_reward:
-                    reward += (curr_score - self.prev_score) / 100
+                    reward += 1 / (curr_score - self.prev_score) 
                 else:
                     reward += self.score_boost
         # Update the previous score
