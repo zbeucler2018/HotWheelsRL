@@ -203,10 +203,16 @@ class LogInfoValues(gym.Wrapper):
 
     def __init__(self, env: Env):
         super().__init__(env)
+        self.episode_count = 0
+
+    def reset(self, **kwargs):
+        self.episode_count += 1
+        return self.env.reset(**kwargs)
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        gym.logger.info(info)
-        wandb.log(info)
+        _log = {f"Episode {self.episode_count} Info": info}
+        gym.logger.info(_log)
+        wandb.log(_log)
         return observation, reward, terminated, truncated, info
 
