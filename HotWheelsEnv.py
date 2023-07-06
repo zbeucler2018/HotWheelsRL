@@ -14,7 +14,7 @@ from gym_wrappers import (
     EncourageTricks,
     NorrmalizeBoost,
     LogInfoValues,
-    CalcAverageSpeed
+#    CalcAverageSpeed
 )
 
 
