@@ -207,4 +207,5 @@ class LogInfoValues(gym.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         wandb.log(info)
+        return observation, reward, terminated, truncated, info
 
