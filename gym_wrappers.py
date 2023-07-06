@@ -171,7 +171,7 @@ class PenalizeHittingWall(gym.Wrapper):
         return observation, reward, terminated, truncated, info
     
 
-class CalcAverageSpeed(gym.wrapper):
+class CalcAverageSpeed(gym.Wrapper):
     """
     Calculate average speed and log to wandb
     """
@@ -196,7 +196,7 @@ class CalcAverageSpeed(gym.wrapper):
         return observation, reward, terminated, truncated, info
     
 
-class LogInfoValues(gym.wrapper):
+class LogInfoValues(gym.Wrapper):
     """
     logs all the values from the info dict to wandb
     """
