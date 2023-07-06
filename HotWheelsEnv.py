@@ -13,11 +13,16 @@ from gym_wrappers import (
     TerminateOnCrash,
     EncourageTricks,
     NorrmalizeBoost,
+    LogInfoValues,
+    CalcAverageSpeed
 )
 
 
 class GameStates(Enum):
-    """Possible game states"""
+    """
+    Possible game states
+    """
+    
     SINGLE = "dino_single.state"
     SINGLE_POINTS = "dino_single_points.state"
     MULTIPLAYER = "dino_multiplayer.state"
@@ -25,7 +30,9 @@ class GameStates(Enum):
 
 @dataclass
 class CustomEnv:
-    """Interface to make a HotWheels env"""
+    """
+    Interface to make a HotWheels env
+    """
 
     game_state: GameStates
     framestack: bool
@@ -35,34 +42,36 @@ class CustomEnv:
     encourage_tricks: bool = False
 
 
-class HotWheelsEnvFactory:
-    @staticmethod
-    def make_env(env_config: CustomEnv) -> Env:
-        """
-        Returns a env of a specific configuration
-        """
+def make_env(env_config: CustomEnv) -> Env:
+    """
+    Returns a env of a specific configuration
+    """
 
-        _env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba",
-            render_mode="rgb_array",
-            state=env_config.game_state.value,
-            use_restricted_actions=env_config.action_space,
-        )
+    _env = retro.make(
+        game="HotWheelsStuntTrackChallenge-gba",
+        render_mode="rgb_array",
+        state=env_config.game_state.value,
+        use_restricted_actions=env_config.action_space,
+    )
 
-        _env = TerminateOnCrash(_env)
-        _env = FixSpeed(_env)
-        # _env = NormalizeBoost(_env)
+    _env = TerminateOnCrash(_env)
+    _env = FixSpeed(_env)
+    # _env = NormalizeBoost(_env)
 
-        if env_config.strict_action_space:
-            _env = SingleActionEnv(_env)
+    if env_config.strict_action_space:
+        _env = SingleActionEnv(_env)
 
-        if env_config.grayscale:
-            _env = GrayScaleObservation(_env, keep_dim=True)
+    if env_config.grayscale:
+        _env = GrayScaleObservation(_env, keep_dim=True)
 
-        if env_config.framestack:
-            _env = FrameStack(_env, num_stack=4)
+    if env_config.framestack:
+        _env = FrameStack(_env, num_stack=4)
 
-        if env_config.encourage_tricks:
-            _env = EncourageTricks(_env)
+    if env_config.encourage_tricks:
+        _env = EncourageTricks(_env)
 
-        return _env
+    # data collection
+    _env = CalcAverageSpeed(_env)
+    _env = LogInfoValues(_env)
+
+    return _env

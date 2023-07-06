@@ -10,9 +10,10 @@ from gymnasium.wrappers import TimeLimit
 # from sb3_contrib import TRPO
 from stable_baselines3 import A2C, DQN, PPO
 from stable_baselines3.common.env_checker import check_env
+from gymnasium.wrappers import RecordVideo
 from wandb.integration.sb3 import WandbCallback
 
-from HotWheelsEnv import CustomEnv
+from HotWheelsEnv import CustomEnv, make_env
 
 
 class ValidAlgos(Enum):
@@ -124,7 +125,7 @@ class Trainer:
         try:
             model.learn(
                 total_timesteps=modelConfig.total_training_timesteps,
-                progress_bar=False,  # try this out
+                progress_bar=True,  # try this out
                 callback=WandbCallback(
                     # gradient_save_freq=wandbConfig.gradient_save_freq,
                     model_save_path=f"models/{_run.id}"
@@ -139,6 +140,7 @@ class Trainer:
         #     raise err
         finally:
             _env.close()
+            del _env
             _run.finish()
 
     def resume_training(

@@ -2,6 +2,7 @@ import gymnasium as gym
 import numpy as np
 from gymnasium.core import Env
 from retro import Actions
+import wandb
 
 
 class Discretizer(gym.ActionWrapper):
@@ -103,6 +104,10 @@ class EncourageTricks(gym.Wrapper):
         super().__init__(env)
         self.prev_score = None
 
+    def reset(self, **kwargs):
+        self.prev_score = None
+        return self.env.reset(**kwargs)
+
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         # Get the current score and compare it with the previous score
@@ -128,7 +133,7 @@ class TerminateOnCrash(gym.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         mean_obs = observation.mean()
-        if mean_obs > self.crash_restart_threshold:
+        if mean_obs >= self.crash_restart_threshold:
             terminated = True
         return observation, reward, terminated, truncated, info
 
@@ -164,3 +169,42 @@ class PenalizeHittingWall(gym.Wrapper):
         if info["speed"] < 5 and info["progress"] > 0:
             reward -= self.hit_wall_penality
         return observation, reward, terminated, truncated, info
+    
+
+class CalcAverageSpeed(gym.wrapper):
+    """
+    Calculate average speed and log to wandb
+    """
+
+    def __init__(self, env: Env):
+        super().__init__(env)
+        self.total_speed = 0
+        self.total_steps = 0
+
+    def reset(self, **kwargs):
+        self.total_speed = 0
+        self.total_steps = 0
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        speed = info.get("speed", 0.0)
+        self.total_speed += speed
+        self.total_steps += 1
+        average_speed = self.total_speed / self.total_steps
+        info["average_speed"] = average_speed
+        return observation, reward, terminated, truncated, info
+    
+
+class LogInfoValues(gym.wrapper):
+    """
+    logs all the values from the info dict to wandb
+    """
+
+    def __init__(self, env: Env):
+        super().__init__(env)
+
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        wandb.log(info)
+

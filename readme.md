@@ -61,3 +61,4 @@ Zack Beucler
 - train 3 laps
 - `+10` for completing a lap
 - `+0.1` or `+0.01` for increasing speed
+- bigger score reward

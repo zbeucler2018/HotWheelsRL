@@ -5,7 +5,7 @@ import retro
 from HotWheelsEnv import (
     GameStates,
     FixSpeed,
-    DoTricks,
+    EncourageTricks,
     TerminateOnCrash,
     NorrmalizeBoost,
     SingleActionEnv,
