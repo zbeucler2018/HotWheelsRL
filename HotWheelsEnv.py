@@ -71,7 +71,7 @@ def make_env(env_config: CustomEnv) -> Env:
         _env = EncourageTricks(_env)
 
     # data collection
-    _env = CalcAverageSpeed(_env)
+    #_env = CalcAverageSpeed(_env)
     _env = LogInfoValues(_env)
 
     return _env

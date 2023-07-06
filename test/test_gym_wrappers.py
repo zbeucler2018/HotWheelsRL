@@ -9,6 +9,8 @@ from HotWheelsEnv import (
     TerminateOnCrash,
     NorrmalizeBoost,
     SingleActionEnv,
+    LogInfoValues,
+    CalcAverageSpeed
 )
 
 
@@ -64,7 +66,7 @@ class TestWrappers(unittest.TestCase):
         observation, reward, terminated, truncated, info = self.env.step(random_action)
 
     def test_DoTricks(self):
-        self.env = DoTricks(self.env)
+        self.env = EncourageTricks(self.env)
         random_action = self.env.action_space.sample()
         observation, reward, terminated, truncated, info = self.env.step(random_action)
 
@@ -85,22 +87,17 @@ class TestWrappers(unittest.TestCase):
         random_action = self.env.action_space.sample()
         observation, reward, terminated, truncated, info = self.env.step(random_action)
 
-    def test_huh(self):
-        self.env.close()
-        self.env = None
-        self.env = retro.make(
-            game="HotWheelsStuntTrackChallenge-gba",
-            render_mode="rgb_array",
-            state=GameStates.SINGLE.value,
-            use_restricted_actions=Actions.DISCRETE,
-        )
-        _, _ = self.env.reset(seed=42)
+    def test_LogInfoValues(self):
+        self.env = LogInfoValues(self.env)
+        for _ in range(100):
+            random_action = self.env.action_space.sample()
+            observation, reward, terminated, truncated, info = self.env.step(random_action)
 
-        random_action = self.env.action_space.sample()
-
-        # print(random_action)
-        # print(self.env.get_action_meaning(random_action))
-        # print(self.env.action_to_array(random_action))
+    def test_CalcAverageSpeed(self):
+        self.env = CalcAverageSpeed(self.env)
+        for _ in range(100):
+            random_action = self.env.action_space.sample()
+            observation, reward, terminated, truncated, info = self.env.step(random_action)
 
 
 if __name__ == "__main__":
