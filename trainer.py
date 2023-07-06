@@ -125,7 +125,7 @@ class Trainer:
         try:
             model.learn(
                 total_timesteps=modelConfig.total_training_timesteps,
-                progress_bar=True,  # try this out
+                progress_bar=False,  # try this out
                 callback=WandbCallback(
                     # gradient_save_freq=wandbConfig.gradient_save_freq,
                     model_save_path=f"models/{_run.id}"
