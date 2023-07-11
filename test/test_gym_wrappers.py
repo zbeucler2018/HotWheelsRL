@@ -2,7 +2,7 @@ import unittest
 
 import retro
 
-from HotWheelsEnv import (
+from env_util import (
     GameStates,
     FixSpeed,
     EncourageTricks,

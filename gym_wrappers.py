@@ -171,31 +171,6 @@ class PenalizeHittingWall(gym.Wrapper):
         return observation, reward, terminated, truncated, info
     
 
-# class CalcAverageSpeed(gym.Wrapper):
-#     """
-#     Calculate average speed and log to wandb
-#     """
-
-#     def __init__(self, env: Env):
-#         super().__init__(env)
-#         self.total_speed = 0
-#         self.total_steps = 0
-
-#     def reset(self, **kwargs):
-#         self.total_speed = 0
-#         self.total_steps = 0
-#         return self.env.reset(**kwargs)
-
-#     def step(self, action):
-#         observation, reward, terminated, truncated, info = self.env.step(action)
-#         speed = info.get("speed", 0.0)
-#         self.total_speed += speed
-#         self.total_steps += 1
-#         average_speed = self.total_speed / self.total_steps
-#         info["average_speed"] = average_speed
-#         return observation, reward, terminated, truncated, info
-    
-
 class LogInfoValues(gym.Wrapper):
     """
     logs all the values from the info dict to wandb
@@ -211,8 +186,7 @@ class LogInfoValues(gym.Wrapper):
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        _log = {f"Episode {self.episode_count} Info": info}
-        gym.logger.info(_log)
-        wandb.log(_log)
+        gym.logger.info(info)
+        #wandb.log(info)
         return observation, reward, terminated, truncated, info
 
