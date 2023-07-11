@@ -10,12 +10,19 @@ from retro import Actions
 
 from gym_wrappers import (
     EncourageTricks,
-    FixSpeed,  # CalcAverageSpeed
+    FixSpeed,
     LogInfoValues,
     NorrmalizeBoost,
-    SingleActionEnv,
     TerminateOnCrash,
 )
+
+
+import os
+from typing import Any, Callable, Dict, Optional, Type, Union
+
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
+
 
 
 class GameStates(Enum):
@@ -26,13 +33,6 @@ class GameStates(Enum):
     SINGLE = "dino_single.state"
     SINGLE_POINTS = "dino_single_points.state"
     MULTIPLAYER = "dino_multiplayer.state"
-
-
-import os
-from typing import Any, Callable, Dict, Optional, Type, Union
-
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
 
 
 def make_hotwheels_vec_env(
@@ -97,7 +97,7 @@ def make_hotwheels_vec_env(
                 env = TerminateOnCrash(env)
                 env = FixSpeed(env)
                 env = EncourageTricks(env)
-                env = LogInfoValues(env)
+                #env = LogInfoValues(env)
             else:
                 env = env_id(**env_kwargs)
                 # Patch to support gym 0.21/0.26 and gymnasium
