@@ -1,18 +1,12 @@
 
 -- By: Zack Beucler
+-- single lap: (data.progress == 320)
+-- three laps: (data.progress >= 950)
 
-function isDone()
-	-- local gameover_val = 33583680
-	-- if data.score > gameover_val then
-	-- 	return true
-	-- else
-	-- 	return false
-	-- end
 
-	local single_lap = 320
-	local three_laps = 950
-	local LAP_LIMIT = single_lap
-	if data.progress >= LAP_LIMIT then
+function isGameOver()
+	-- if data.progress >= 949 then
+	if data.lap >= 4 then
 		return true
 	else
 		return false
@@ -20,15 +14,28 @@ function isDone()
 end
 
 
+function isHittingWall()
+	if data.hit_wall > 100 then
+		return true
+	else
+		return false
+	end
+end
+
+
+function isDone()
+	return isGameOver() or isHittingWall()
+end
+
+
 previous_progress = 0
 function calculateReward()
 	local current_progress = data.progress
+	local delta = 0
 	if current_progress > previous_progress then
-		local delta = current_progress - previous_progress
+		delta = current_progress - previous_progress
 		previous_progress = current_progress
-		return delta
-	else
-		return 0
 	end
+	return delta
 end
 
