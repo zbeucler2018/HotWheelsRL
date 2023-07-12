@@ -1,5 +1,8 @@
 # HotWheelsRL (wip)
 
+<img src="misc/game_frame.png">
+
+
 Zack Beucler
 
 
@@ -21,10 +24,8 @@ Zack Beucler
 
 ## Immediate TODO
   - [ ] Figure out loging info to wandb in vec envs
-  - [ ] Trim observation such that only important stuff is included (wrapper)
-  - [x] After training, record video of trained agent and save as wandb artifact
-  - [ ] For training, dont stop at 1 lap, allow full race (3 laps)
-  - [ ] Impliment `PunishHittingWalls` wrapper
+  - [x] Trim observation such that only important stuff is included (wrapper)
+  - [x] For training, dont stop at 1 lap, allow full race (3 laps)
   - [ ] Add ability to resume training
 
 
