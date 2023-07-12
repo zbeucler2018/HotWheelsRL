@@ -1,5 +1,8 @@
 # HotWheelsRL (wip)
 
+<img src="misc/game_frame.png">
+
+
 Zack Beucler
 
 
@@ -10,8 +13,6 @@ Zack Beucler
 - [ ] Train 3 agents for each algo
   - try different policies (cnn, mlp) especially to give the model speed, score, etc during training
 - [ ] Re-evaluate to improve
-
-
 - bonus
   - [ ] leaderboard site
     - leaderboard for fastest lap amoung all agents of different algorithms
@@ -19,6 +20,13 @@ Zack Beucler
     - mkdocs + github pages
      
 **MUST HAVE A `data.json` FILE**
+
+
+## Immediate TODO
+  - [ ] Figure out loging info to wandb in vec envs
+  - [x] Trim observation such that only important stuff is included (wrapper)
+  - [x] For training, dont stop at 1 lap, allow full race (3 laps)
+  - [ ] Add ability to resume training
 
 
 ## Resources
