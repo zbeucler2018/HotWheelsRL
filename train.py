@@ -102,9 +102,11 @@ def main(algorithm, total_training_steps, wandb_api_key, framestack, save_video)
         env = VecFrameStack(env, n_stack=4)
 
     if save_video:
-        env = VecVideoRecorder(env, VIDEO_SAVE_PATH,
-                       record_video_trigger=lambda x: x == 0, video_length=VIDEO_LENGTH,
-                       name_prefix=f"{RUN_ID}-{ENV_ID}")
+        raise NotImplementedError("Saving to video not ready yet")
+        # raises an error when attempting to train agent
+        # env = VecVideoRecorder(env, VIDEO_SAVE_PATH,
+        #                record_video_trigger=lambda x: x == 0, video_length=VIDEO_LENGTH,
+        #                name_prefix=f"{RUN_ID}-{ENV_ID}")
 
     # make model
     model = make_model(

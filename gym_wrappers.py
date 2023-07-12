@@ -6,17 +6,10 @@ import wandb
 
 
 class Discretizer(gym.ActionWrapper):
-    """
-    Wrap a gym environment and make it use discrete actions.
-    based on https://github.com/openai/retro-baselines/blob/master/agents/sonic_util.py
-    Args:
-        buttons: ordered list of buttons, corresponding to each dimension of the MultiBinary action space
-        combos: ordered list of lists of valid button combinations
-    """
-
-    def __init__(self, env, buttons, combos):
+    def __init__(self, env: Env, combos):
         super().__init__(env)
         assert isinstance(env.action_space, gym.spaces.MultiBinary)
+        buttons = env.unwrapped.buttons
         self._decode_discrete_action = []
         for combo in combos:
             arr = np.array([False] * env.action_space.n)
@@ -26,59 +19,24 @@ class Discretizer(gym.ActionWrapper):
 
         self.action_space = gym.spaces.Discrete(len(self._decode_discrete_action))
 
-    def discrete_to_boolean_array(self, action):
-        """
-        convert discrete action to boolean array
-        """
-        return self._decode_discrete_action[action].copy()
-
-    def discrete_to_multibinary(self, action):
-        """
-        converts discrete value to multibinary array
-        """
-        arr = self.action(action)
-        # convert boolean array to multibinary
-        return arr.astype(np.uint8)
+    def action(self, _action):
+        return self._decode_discrete_action[_action].copy()
 
 
-class SingleActionEnv(Discretizer):
+class HotWheelsDiscretizer(Discretizer):
     """
-    Restricts the agent's actions to a a single button per action
-
-            []
-            , ['B']
-            , ['A']
-            , ['UP']
-            , ['DOWN']
-            , ['LEFT']
-            , ['RIGHT']
-            , ['L', 'R']
+    Forces Agent to use specific buttons and combos
     """
 
     def __init__(self, env):
-        super().__init__(
-            env=env,
-            buttons=env.unwrapped.buttons,
-            combos=[
-                [],
-                ["B"],
-                ["A"],
-                ["UP"],
-                ["DOWN"],
-                ["LEFT"],
-                ["RIGHT"],
-                ["L", "R"],
-            ],
-        )
-
-        self.original_env = env
-
-    def get_discrete_button_meaning(self, action):
-        """
-        get button from discrete action
-        """
-        multibinary_action = self.discrete_to_multibinary(action)
-        return self.original_env.get_action_meaning(multibinary_action)
+        action_space = [
+            ["A", "UP"],
+            ["A", "DOWN"],
+            ["A", "LEFT"],
+            ["A", "RIGHT"],
+            ["A", "L", "R"],
+        ]
+        super().__init__(env=env, combos=action_space)
 
 
 class FixSpeed(gym.Wrapper):
@@ -114,7 +72,7 @@ class EncourageTricks(gym.Wrapper):
         curr_score = info.get("score")
         if curr_score is not None and self.prev_score is not None:
             if curr_score > self.prev_score:
-                reward += 1 / (curr_score - self.prev_score) 
+                reward += 1 / (curr_score - self.prev_score)
         # Update the previous score
         self.prev_score = curr_score
         return observation, reward, terminated, truncated, info
@@ -153,24 +111,6 @@ class NorrmalizeBoost(gym.Wrapper):
         return observation, reward, terminated, truncated, info
 
 
-class PenalizeHittingWall(gym.Wrapper):
-    """
-    Penalizes the agent for hitting a wall during the episode.
-    The current way to detect a wall collision is if the speed is
-    zero while progressing through the episode
-    """
-
-    def __init__(self, env, penalty):
-        super().__init__(env, penalty=1)
-        self.hit_wall_penality = penalty
-
-    def step(self, action):
-        observation, reward, terminated, truncated, info = self.env.step(action)
-        if info["speed"] < 5 and info["progress"] > 0:
-            reward -= self.hit_wall_penality
-        return observation, reward, terminated, truncated, info
-    
-
 class LogInfoValues(gym.Wrapper):
     """
     logs all the values from the info dict to wandb
@@ -187,6 +127,38 @@ class LogInfoValues(gym.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         gym.logger.info(info)
-        #wandb.log(info)
+        # wandb.log(info)
         return observation, reward, terminated, truncated, info
 
+
+class PunishHittingWalls(gym.Wrapper):
+    """
+    Punishes agent when hitting a wall
+    """
+
+    def __init__(self, env: Env, punishment: int = 5):
+        super().__init__(env)
+        self.punishment = punishment
+
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        if info.get("hit_wall", None) and info.get("hit_wall", None) == 101:
+            reward -= self.punishment
+
+        return observation, reward, terminated, truncated, info
+
+
+class CropObservation(gym.Wrapper):
+    """
+    Reduces observation such that not
+    important things (speed dial, mini map)
+    are not included in the observation.
+    Resulting obs shape is (110, 130, 3)
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        return observation[50:, 50:180, :], reward, terminated, truncated, info

@@ -22,8 +22,10 @@ Zack Beucler
 ## Immediate TODO
   - [ ] Figure out loging info to wandb in vec envs
   - [ ] Trim observation such that only important stuff is included (wrapper)
-  - [ ] After training, record video of trained agent and save as wandb artifact
+  - [x] After training, record video of trained agent and save as wandb artifact
   - [ ] For training, dont stop at 1 lap, allow full race (3 laps)
+  - [ ] Impliment `PunishHittingWalls` wrapper
+  - [ ] Add ability to resume training
 
 
 ## Resources

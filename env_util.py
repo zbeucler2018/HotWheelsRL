@@ -1,19 +1,20 @@
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Tuple, Union
 
-import gymnasium as gym
 import retro
 from gymnasium.core import Env
-from gymnasium.wrappers import FrameStack, GrayScaleObservation
-from retro import Actions
+from gymnasium.wrappers import GrayScaleObservation, ResizeObservation
+
 
 from gym_wrappers import (
-    EncourageTricks,
-    FixSpeed,
     LogInfoValues,
     NorrmalizeBoost,
+    PunishHittingWalls,
+    EncourageTricks,
+    FixSpeed,
     TerminateOnCrash,
+    HotWheelsDiscretizer,
+    CropObservation
 )
 
 
@@ -22,7 +23,6 @@ from typing import Any, Callable, Dict, Optional, Type, Union
 
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
-
 
 
 class GameStates(Enum):
@@ -93,11 +93,14 @@ def make_hotwheels_vec_env(
                 # if the render mode was not specified, we set it to `rgb_array` as default.
                 kwargs = {"render_mode": "rgb_array"}
                 kwargs.update(env_kwargs)
-                env = retro.make(env_id, state=game_state, use_restricted_actions=retro.Actions.DISCRETE, **kwargs)  # type: ignore[arg-type]
+                env = retro.make(env_id, state=game_state, **kwargs)  # type: ignore[arg-type]
                 env = TerminateOnCrash(env)
                 env = FixSpeed(env)
                 env = EncourageTricks(env)
-                #env = LogInfoValues(env)
+                env = HotWheelsDiscretizer(env)
+                env = CropObservation(env)
+                env = ResizeObservation(env, (84, 84))
+                # env = LogInfoValues(env)
             else:
                 env = env_id(**env_kwargs)
                 # Patch to support gym 0.21/0.26 and gymnasium
