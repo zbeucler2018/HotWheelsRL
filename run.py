@@ -59,7 +59,7 @@ def run(model_save_path: str, algorithm: str, framestack: bool):
 
 
 if __name__ == "__main__":
-    run(model_save_path="./model.zip", algorithm="PPO", framestack=True)
+    #run(model_save_path="./model.zip", algorithm="PPO", framestack=True)
 
     parser = argparse.ArgumentParser()
 
