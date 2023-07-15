@@ -59,7 +59,7 @@ def run(model_save_path: str, algorithm: str, framestack: bool):
 
 
 if __name__ == "__main__":
-    #run(model_save_path="./model.zip", algorithm="PPO", framestack=True)
+    # run(model_save_path="./model.zip", algorithm="PPO", framestack=True)
 
     parser = argparse.ArgumentParser()
 
@@ -71,16 +71,16 @@ if __name__ == "__main__":
         choices=["PPO", "A2C", "DQN"],
     )
     parser.add_argument(
-        "--model_save_path", help="Relative path to model (.zip)", type=str, required=True
+        "--model_save_path",
+        help="Relative path to model (.zip)",
+        type=str,
+        required=True,
     )
     parser.add_argument(
-        "--framestack", help="Uses stacks of 4 frames", action='store_true'
+        "--framestack", help="Uses stacks of 4 frames", action="store_true"
     )
 
-
-
     args = parser.parse_args()
-
 
     run(
         algorithm=args.algorithm,
