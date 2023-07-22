@@ -70,3 +70,6 @@ Zack Beucler
 - `+10` for completing a lap
 - `+0.1` or `+0.01` for increasing speed
 - bigger score reward
+
+## Hyperparameters
+- using PPO hyperparameters from [Proximal Policy Optimization Algorithms](https://arxiv.org/pdf/1707.06347.pdf) paper

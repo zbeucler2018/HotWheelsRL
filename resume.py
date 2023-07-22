@@ -57,20 +57,11 @@ def resume(
         model_save_freq=25_000,
         verbose=1,
     )
-    # TODO: Figure out how to wandb log info stuff in vec envs (https://github.com/wandb/wandb/issues/5087)
-    # hw_callback = HotWheelsCallback(
-    #     _model_save_path=f"models/{_run.id}",
-    #     _model_save_freq=25_000,
-    #    # verbose=1
-    # )
-
-    MAX_ENVS = multiprocessing.cpu_count()
-    print(f"Using {MAX_ENVS} CPUs")
 
     env = make_hotwheels_vec_env(
         env_id=ENV_ID,
         game_state=GameStates.SINGLE.value,
-        n_envs=MAX_ENVS,
+        n_envs=8,
         seed=42,
         vec_env_cls=SubprocVecEnv,
         # wrapper_class=VecFrameStack if framestack else None,
