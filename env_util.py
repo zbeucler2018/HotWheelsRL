@@ -23,6 +23,7 @@ from typing import Any, Callable, Dict, Optional, Type, Union
 
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
+from stable_baselines3.common.atari_wrappers import ClipRewardEnv
 
 
 class GameStates(Enum):
@@ -100,7 +101,7 @@ def make_hotwheels_vec_env(
                 env = HotWheelsDiscretizer(env)
                 env = CropObservation(env)
                 env = ResizeObservation(env, (84, 84))
-                # env = LogInfoValues(env)
+                env = ClipRewardEnv(env)
             else:
                 env = env_id(**env_kwargs)
                 # Patch to support gym 0.21/0.26 and gymnasium

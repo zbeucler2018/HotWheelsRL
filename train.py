@@ -45,7 +45,13 @@ def make_model(_env: Env, _algo: str, _tensorboard_log_path: str) -> PPO | A2C |
         _env,
         verbose=1,
         tensorboard_log=_tensorboard_log_path,
-        learning_rate=default_learning_rate,
+        # from https://arxiv.org/pdf/1707.06347.pdf
+        learning_rate=2.5e-4,
+        n_steps=128,
+        n_epochs=3,
+        batch_size=32,
+        ent_coef=0.01,
+        vf_coef=1.0
     )
 
     return model
