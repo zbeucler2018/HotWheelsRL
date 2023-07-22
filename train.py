@@ -85,12 +85,7 @@ def main(algorithm, total_training_steps, wandb_api_key, framestack, save_video)
         model_save_freq=25_000,
         verbose=1,
     )
-    # TODO: Figure out how to wandb log info stuff in vec envs (https://github.com/wandb/wandb/issues/5087)
-    # hw_callback = HotWheelsCallback(
-    #     _model_save_path=f"models/{_run.id}",
-    #     _model_save_freq=25_000,
-    #    # verbose=1
-    # )
+
 
     MAX_ENVS = multiprocessing.cpu_count()
     print(f"Using {MAX_ENVS} CPUs")
