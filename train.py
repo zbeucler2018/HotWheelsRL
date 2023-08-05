@@ -1,145 +1,125 @@
 import argparse
-import multiprocessing
-import os
-from enum import Enum
+import wandb
+from wandb.integration.sb3 import WandbCallback
+from stable_baselines3.common.callbacks import EvalCallback, CallbackList
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.atari_wrappers import ClipRewardEnv
 
-from gymnasium.core import Env
-from gymnasium.wrappers import RecordVideo
-from stable_baselines3 import A2C, DQN, PPO
+from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
-    DummyVecEnv,
     SubprocVecEnv,
     VecFrameStack,
-    VecVideoRecorder,
+    VecTransposeImage,
 )
-from stable_baselines3.common.callbacks import EvalCallback, CallbackList
-from wandb.integration.sb3 import WandbCallback
 
-import wandb
-from env_util import GameStates, make_hotwheels_vec_env
+from gym_wrappers import (
+    EncourageTricks,
+    FixSpeed,
+    TerminateOnCrash,
+    HotWheelsDiscretizer,
+    CropObservation,
+)
+import retro
 
+def print_args(func: callable):
+    """Decorator to print the training args"""
+    def _wrapper(**kwargs):
+        print('------------')
+        print(kwargs)
+        print('------------')
+        return func(**kwargs)
+    return _wrapper
 
-class ValidAlgos(Enum):
-    PPO = "PPO"
-    A2C = "A2C"
-    DQN = "DQN"
-    # TRPO = "TRPO"
+@print_args
+def main(
+    total_training_steps, resume, run_id, model_path, num_envs, encourage_tricks, crop_obs
+) -> None:
+    # check if we want to resume
+    if resume or run_id:
+        assert (
+            resume
+        ), "--resume, --run_id, and --model_path must be populated to resume training a model"
+        assert (
+            run_id
+        ), "--resume, --run_id, and --model_path must be populated to resume training a model"
+        assert (
+            model_path
+        ), "--resume, --run_id, and --model_path must be populated to resume training a model"
 
+    def make_retro():
+        _env = retro.make("HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array")
+        _env = Monitor(env=_env)
+        _env = TerminateOnCrash(_env)
+        _env = FixSpeed(_env)
+        _env = HotWheelsDiscretizer(_env)
+        _env = ClipRewardEnv(_env)
+        if encourage_tricks:
+            _env = EncourageTricks(_env)
+        if crop_obs:
+            _env = CropObservation(_env)
+        return _env
 
-def make_model(_env: Env, _algo: str, _tensorboard_log_path: str) -> PPO | A2C | DQN:
-    """
-    Returns a model for the give config and env
-    """
-    _algo = _algo.upper()
-    valid_algos = {
-        # algo enum, learning rate
-        ValidAlgos.PPO.value: (PPO, 0.0003),
-        ValidAlgos.A2C.value: (A2C, 0.0007),
-        ValidAlgos.DQN.value: (DQN, 0.0001),
-    }
-
-    ModelClass, default_learning_rate = valid_algos[_algo]
-
-    model = ModelClass(
-        "CnnPolicy",
-        _env,
-        verbose=1,
-        tensorboard_log=_tensorboard_log_path,
-        # from https://arxiv.org/pdf/1707.06347.pdf
-        learning_rate=2.5e-4,
-        n_steps=128,
-        n_epochs=3,
-        batch_size=32,
-        ent_coef=0.01,
-        vf_coef=1.0
+    # create env
+    venv = VecTransposeImage(
+        VecFrameStack(SubprocVecEnv([make_retro] * num_envs), n_stack=4)
     )
 
-    return model
-
-
-def main(algorithm, total_training_steps, wandb_api_key, framestack, save_video):
-    """
-    Trains a HotWheels Agent
-    """
-    ENV_ID: str = "HotWheelsStuntTrackChallenge-gba"
-    LOG_PATH: str = f"{os.getcwd()}/logs"
-    MODEL_SAVE_PATH: str = f"{os.getcwd()}/models"
-    VIDEO_LENGTH = 1_000
-    VIDEO_SAVE_PATH = f"{os.getcwd()}/videos"
-    RUN_ID: str | None = None
-    MODEL_EVAL_FREQ: int = 150_000
-
-    # wandb stuff
-    os.system(f"wandb login {wandb_api_key}")
+    # setup wandb
     _config = {
-        "algorithm": algorithm,
+        "algorithm": "PPO",
         "total_training_steps": total_training_steps,
-        "max_steps_per_episode": "no limit",
-        "tensorboard_log_path": LOG_PATH,  # is this needed?
-        "framestack": framestack,
+        "framestack": True,
     }
     _run = wandb.init(
         project="sb3-hotwheels",
         config=_config,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-        reinit=True,
+        resume=True if resume else None,
+        id=run_id if run_id else None,
     )
-    RUN_ID = _run.id
+
+    # setup callbacks
     wandb_callback = WandbCallback(
-        # gradient_save_freq=wandbConfig.gradient_save_freq,
-        model_save_path=MODEL_SAVE_PATH,
+        #gradient_save_freq=1_000,
+        model_save_path="./models/",
         model_save_freq=25_000,
         verbose=1,
     )
-
-
-    MAX_ENVS = multiprocessing.cpu_count()
-    print(f"Using {MAX_ENVS} CPUs")
-
-    venv_cls = SubprocVecEnv
-    if MAX_ENVS == 1:
-        venv_cls = DummyVecEnv
-
-    env = make_hotwheels_vec_env(
-        env_id=ENV_ID,
-        game_state=GameStates.SINGLE.value,
-        n_envs=MAX_ENVS,
-        seed=42,
-        vec_env_cls=venv_cls,
-        # wrapper_class=VecFrameStack if framestack else None,
-        # wrapper_kwargs={ 'n_stack': 4 } if framestack else {}
-    )
-
-    if framestack:
-        env = VecFrameStack(env, n_stack=4)
-
-    if save_video:
-        raise NotImplementedError("Saving to video not ready yet")
-        # raises an error when attempting to train agent
-        # env = VecVideoRecorder(env, VIDEO_SAVE_PATH,
-        #                record_video_trigger=lambda x: x == 0, video_length=VIDEO_LENGTH,
-        #                name_prefix=f"{RUN_ID}-{ENV_ID}")
-
     eval_callback = EvalCallback(
-        env,
-        best_model_save_path="./logs/",
+        venv,
+        best_model_save_path="./best_model/",
         log_path="./logs/",
-        eval_freq=MODEL_EVAL_FREQ,
+        eval_freq=150_000,
         deterministic=True,
         render=False,
     )
-
     _callback_list = CallbackList([eval_callback, wandb_callback])
 
-    # make model
-    model = make_model(_env=env, _algo=algorithm, _tensorboard_log_path=LOG_PATH)
-
-    # train model
+    # setup model
+    if resume:
+        model = PPO.load(path=model_path, env=venv)
+    else:
+        model = PPO(
+            "CnnPolicy",
+            venv,
+            verbose=1,
+            tensorboard_log="./logs/",
+            # from https://arxiv.org/pdf/1707.06347.pdf
+            learning_rate=2.5e-4,
+            n_steps=128,
+            n_epochs=3,
+            batch_size=32,
+            ent_coef=0.01,
+            vf_coef=1.0,
+        )
     try:
-        model.learn(total_timesteps=total_training_steps, callback=_callback_list)
+        model.learn(
+            total_timesteps=total_training_steps,
+            callback=_callback_list,
+            reset_num_timesteps=False if resume else True,
+        )
     finally:
-        env.close()
-        del env
+        venv.close()
         _run.finish()
 
 
@@ -147,60 +127,39 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--algorithm",
-        help="Algorithm to learn",
-        type=str,
-        required=True,
-        choices=["PPO", "A2C", "DQN"],
+        "--total_steps", help="Total steps to train", type=int, required=True
+    )
+    parser.add_argument("--resume", help="Resume training a model", action="store_true")
+    parser.add_argument(
+        "--run_id", help="Wandb run ID to resume training a model", type=str
+    )
+    parser.add_argument("--model_path", help="Path to saved model to resume training", type=str)
+    parser.add_argument(
+        "--num_envs",
+        help="Number of envs to train at the same time. Default is 8",
+        type=int,
+        required=False,
+        default=8,
     )
     parser.add_argument(
-        "--total_training_steps", help="Total steps to train", type=int, required=True
-    )
-    parser.add_argument(
-        "--framestack", help="Uses stacks of 4 frames", action="store_true"
-    )
-    parser.add_argument(
-        "--save_video",
-        help="Saves a video of the envs after training",
+        "--encourage_tricks",
+        help="Give a reward for doing tricks and increasing score",
         action="store_true",
     )
     parser.add_argument(
-        "--wandb_api_key", help="API key for WandB monitoring", type=str, required=True
+        "--crop_obs",
+        help="Crop the observation so the model isn't given the entire obs",
+        action="store_true",
     )
 
     args = parser.parse_args()
 
     main(
-        algorithm=args.algorithm,
-        total_training_steps=args.total_training_steps,
-        wandb_api_key=args.wandb_api_key,
-        framestack=args.framestack,
-        save_video=args.save_video,
+        total_training_steps=args.total_steps,
+        resume=args.resume,
+        run_id=args.run_id,
+        model_path=args.model_path,
+        num_envs=args.num_envs,
+        encourage_tricks=args.encourage_tricks,
+        crop_obs=args.crop_obs,
     )
-
-
-"""
-python train.py --algorithm PPO --total_training_steps 500 --wandb_api_key 
-
-I need to set:
-    game_state
-    algorithm
-    total_training_steps
-    wandb_api_key
-
-# TODO: add ability to use these options
-optional:
-    policy
-    learning_rate
-    gamma
-
-experimental:
-    skip_wandb(_login): bool
-    framestack: bool
-    grayscale: bool
-    number_laps_per_episode: 1 =< int =< 3
-    action_space: Action
-    max_steps_per_episode: int
-
-
-"""
