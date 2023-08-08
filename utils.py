@@ -1,6 +1,15 @@
 import os
-import retro
 import multiprocessing
+from stable_baselines3.common.monitor import Monitor
+from gym_wrappers import (
+    EncourageTricks,
+    FixSpeed,
+    TerminateOnCrash,
+    HotWheelsDiscretizer,
+    CropObservation,
+)
+from stable_baselines3 import PPO
+import retro
 
 
 def get_retro_install_path(verbose: bool = False) -> str:
@@ -51,3 +60,15 @@ def get_num_cpus() -> int:
     Returns number of cpus
     """
     return multiprocessing.cpu_count()
+
+
+def print_args(func: callable):
+    """Decorator to print the training args"""
+
+    def _wrapper(**kwargs):
+        print("------------")
+        print(kwargs)
+        print("------------")
+        return func(**kwargs)
+
+    return _wrapper

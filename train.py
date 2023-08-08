@@ -2,37 +2,30 @@ import argparse
 import wandb
 from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.callbacks import EvalCallback, CallbackList
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.atari_wrappers import ClipRewardEnv
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
     SubprocVecEnv,
     VecFrameStack,
     VecTransposeImage,
+    DummyVecEnv,
 )
 
-from gym_wrappers import (
-    EncourageTricks,
-    FixSpeed,
-    TerminateOnCrash,
-    HotWheelsDiscretizer,
-    CropObservation,
-)
-import retro
+from gym_wrappers import make_retro
 
-def print_args(func: callable):
-    """Decorator to print the training args"""
-    def _wrapper(**kwargs):
-        print('------------')
-        print(kwargs)
-        print('------------')
-        return func(**kwargs)
-    return _wrapper
+from utils import print_args
+
 
 @print_args
 def main(
-    total_training_steps, resume, run_id, model_path, num_envs, encourage_tricks, crop_obs
+    total_training_steps,
+    resume,
+    run_id,
+    model_path,
+    num_envs,
+    encourage_tricks,
+    crop_obs,
+    minimap_obs,
 ) -> None:
     # check if we want to resume
     if resume or run_id:
@@ -46,23 +39,15 @@ def main(
             model_path
         ), "--resume, --run_id, and --model_path must be populated to resume training a model"
 
-    def make_retro():
-        _env = retro.make("HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array")
-        _env = Monitor(env=_env)
-        _env = TerminateOnCrash(_env)
-        _env = FixSpeed(_env)
-        _env = HotWheelsDiscretizer(_env)
-        _env = ClipRewardEnv(_env)
-        if encourage_tricks:
-            _env = EncourageTricks(_env)
-        if crop_obs:
-            _env = CropObservation(_env)
-        return _env
+    assert not (minimap_obs and crop_obs), "--minimap_obs or --crop_obs, not both"
 
     # create env
-    venv = VecTransposeImage(
-        VecFrameStack(SubprocVecEnv([make_retro] * num_envs), n_stack=4)
-    )
+    if num_envs == 1:
+        venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_retro]), n_stack=4))
+    else:
+        venv = VecTransposeImage(
+            VecFrameStack(SubprocVecEnv([make_retro] * num_envs), n_stack=4)
+        )
 
     # setup wandb
     _config = {
@@ -80,14 +65,14 @@ def main(
 
     # setup callbacks
     wandb_callback = WandbCallback(
-        #gradient_save_freq=1_000,
+        # gradient_save_freq=1_000,
         model_save_path="./models/",
         model_save_freq=25_000,
         verbose=1,
     )
     eval_callback = EvalCallback(
         venv,
-        best_model_save_path="./best_model/",
+        best_model_save_path=f"./best_model/{_run.id}/",
         log_path="./logs/",
         eval_freq=150_000,
         deterministic=True,
@@ -133,7 +118,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--run_id", help="Wandb run ID to resume training a model", type=str
     )
-    parser.add_argument("--model_path", help="Path to saved model to resume training", type=str)
+    parser.add_argument(
+        "--model_path", help="Path to saved model to resume training", type=str
+    )
     parser.add_argument(
         "--num_envs",
         help="Number of envs to train at the same time. Default is 8",
@@ -148,7 +135,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--crop_obs",
-        help="Crop the observation so the model isn't given the entire obs",
+        help="Crop the observation so the model isn't given the entire obs, just a section with the car in it",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--minimap_obs",
+        help="Crop the observation so the model is given only the minimap",
         action="store_true",
     )
 
@@ -162,4 +154,5 @@ if __name__ == "__main__":
         num_envs=args.num_envs,
         encourage_tricks=args.encourage_tricks,
         crop_obs=args.crop_obs,
+        minimap_obs=args.minimap_obs,
     )

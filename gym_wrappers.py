@@ -1,8 +1,11 @@
 import gymnasium as gym
 import numpy as np
 from gymnasium.core import Env
-from retro import Actions
-import wandb
+import retro
+
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.atari_wrappers import ClipRewardEnv
+from gymnasium.wrappers import ResizeObservation
 
 
 class Discretizer(gym.ActionWrapper):
@@ -26,10 +29,17 @@ class Discretizer(gym.ActionWrapper):
 class HotWheelsDiscretizer(Discretizer):
     """
     Forces Agent to use specific buttons and combos
+            [],
+            ["A", "UP"],
+            ["A", "DOWN"],
+            ["A", "LEFT"],
+            ["A", "RIGHT"],
+            ["A", "L", "R"],
     """
 
     def __init__(self, env):
         action_space = [
+            [],
             ["A", "UP"],
             ["A", "DOWN"],
             ["A", "LEFT"],
@@ -81,7 +91,7 @@ class EncourageTricks(gym.Wrapper):
 class TerminateOnCrash(gym.Wrapper):
     """
     A wrapper that ends the episode if the mean of the observation is above a certain threshold.
-    FYI: The screen will turn completely white when restarting.
+    Triggered when screen turns white after crash
     """
 
     def __init__(self, env, threshold=238):
@@ -111,43 +121,6 @@ class NorrmalizeBoost(gym.Wrapper):
         return observation, reward, terminated, truncated, info
 
 
-class LogInfoValues(gym.Wrapper):
-    """
-    logs all the values from the info dict to wandb
-    """
-
-    def __init__(self, env: Env):
-        super().__init__(env)
-        self.episode_count = 0
-
-    def reset(self, **kwargs):
-        self.episode_count += 1
-        return self.env.reset(**kwargs)
-
-    def step(self, action):
-        observation, reward, terminated, truncated, info = self.env.step(action)
-        gym.logger.info(info)
-        # wandb.log(info)
-        return observation, reward, terminated, truncated, info
-
-
-class PunishHittingWalls(gym.Wrapper):
-    """
-    Punishes agent when hitting a wall
-    """
-
-    def __init__(self, env: Env, punishment: int = 5):
-        super().__init__(env)
-        self.punishment = punishment
-
-    def step(self, action):
-        observation, reward, terminated, truncated, info = self.env.step(action)
-        if info.get("hit_wall", None) and info.get("hit_wall", None) == 101:
-            reward -= self.punishment
-
-        return observation, reward, terminated, truncated, info
-
-
 class CropObservation(gym.Wrapper):
     """
     Reduces observation such that not
@@ -162,3 +135,67 @@ class CropObservation(gym.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         return observation[50:, 50:180, :], reward, terminated, truncated, info
+
+
+class MiniMapObservation(gym.Wrapper):
+    """
+    Reduces the obs to just the minimap.
+    Resulting size is (65, 55, 3)
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        return observation[95:, :55, :], reward, terminated, truncated, info
+
+
+def make_retro(
+    encourage_tricks: bool = False,
+    crop_obs: bool = False,
+    minimap_obs: bool = False,
+    **env_kwargs
+):
+    """
+    Makes retro env with these wrappers
+        TerminateOnCrash(_env)
+        Monitor(_env)
+        FixSpeed(_env)
+        HotWheelsDiscretizer(_env)
+        ClipRewardEnv(_env)
+        EncourageTricks(_env) (optional)
+        CropObservation(_env) (optional)
+        MiniMapObservation(_env)     (optional)
+        ResizeObservation(_env, (84,84)) 84,84 default, 56,56 if minimapobs
+    """
+    _env = retro.make(
+        "HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", **env_kwargs
+    )
+    _env = Monitor(env=_env)
+    _env = TerminateOnCrash(_env)
+    _env = FixSpeed(_env)
+    _env = HotWheelsDiscretizer(_env)
+    _env = ClipRewardEnv(_env)
+    if encourage_tricks:
+        _env = EncourageTricks(_env)
+    if crop_obs:
+        _env = CropObservation(_env)
+    if minimap_obs:
+        _env = MiniMapObservation(_env)
+        _env = ResizeObservation(_env, (56, 56))  # resize to something compatible
+    else:
+        # minimap obs is smaller than 84x84
+        _env = ResizeObservation(_env, (84, 84))
+    return _env
+
+
+def render(model_path, **env_kwargs):
+    # TODO
+    _env = make_retro(**env_kwargs)
+    pass
+
+
+def save_video(model_path):
+    # TODO
+    pass
