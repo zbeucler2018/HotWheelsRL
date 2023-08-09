@@ -10,7 +10,7 @@ from env_util import (
     NorrmalizeBoost,
     SingleActionEnv,
     LogInfoValues,
-    CalcAverageSpeed
+    CalcAverageSpeed,
 )
 
 
@@ -91,13 +91,17 @@ class TestWrappers(unittest.TestCase):
         self.env = LogInfoValues(self.env)
         for _ in range(100):
             random_action = self.env.action_space.sample()
-            observation, reward, terminated, truncated, info = self.env.step(random_action)
+            observation, reward, terminated, truncated, info = self.env.step(
+                random_action
+            )
 
     def test_CalcAverageSpeed(self):
         self.env = CalcAverageSpeed(self.env)
         for _ in range(100):
             random_action = self.env.action_space.sample()
-            observation, reward, terminated, truncated, info = self.env.step(random_action)
+            observation, reward, terminated, truncated, info = self.env.step(
+                random_action
+            )
 
 
 if __name__ == "__main__":

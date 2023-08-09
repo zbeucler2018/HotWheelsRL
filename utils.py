@@ -1,6 +1,7 @@
 import os
-import retro
 import multiprocessing
+import sys
+import retro
 
 
 def get_retro_install_path(verbose: bool = False) -> str:
@@ -36,14 +37,9 @@ def install_rom(game: str) -> None:
 
 def in_colab() -> bool:
     """
-    Returns true if in colab
+    Returns true if in colab notebook
     """
-    try:
-        import google.colab
-
-        return True
-    except Exception as err:
-        return False
+    return "google.colab" in sys.modules
 
 
 def get_num_cpus() -> int:
@@ -51,3 +47,18 @@ def get_num_cpus() -> int:
     Returns number of cpus
     """
     return multiprocessing.cpu_count()
+
+
+def print_args(func: callable):
+    """
+    Decorator to print the keyword arguments
+    of the function it decorates
+    """
+
+    def _wrapper(**kwargs):
+        print("------------")
+        print(kwargs)
+        print("------------")
+        return func(**kwargs)
+
+    return _wrapper
