@@ -1,32 +1,13 @@
 # HotWheelsRL (wip)
 
-<img src="misc/game_frame.png">
+<img src="misc/vec.gif" style="display: block; margin-left: auto; margin-right: auto;">
 
 
 Zack Beucler
 
 
 - Use RL to train an agent to competitively complete a race on the first level in the GBA game 'Hot Wheels Stunt Track Challenge'
-- Agent should be decently fast (less than 2min per lap), and increase it's score
-
-## Todo
-- [ ] Train 3 agents for each algo
-  - try different policies (cnn, mlp) especially to give the model speed, score, etc during training
-- [ ] Re-evaluate to improve
-- bonus
-  - [ ] leaderboard site
-    - leaderboard for fastest lap amoung all agents of different algorithms
-      - has a video of the race for each entry and some info about the agent
-    - mkdocs + github pages
-     
-**MUST HAVE A `data.json` FILE**
-
-
-## Immediate TODO
-  - [ ] Figure out loging info to wandb in vec envs
-  - [x] Trim observation such that only important stuff is included (wrapper)
-  - [x] For training, dont stop at 1 lap, allow full race (3 laps)
-  - [ ] Add ability to resume training
+- Agent should be be able to complete a lap
 
 
 ## Resources
@@ -57,12 +38,11 @@ Zack Beucler
 - math is probably formatted wrong but idc
 
 ```math
-\sum_{i=1}^{n} (progress_i - progress_{i-1}) + (1 / (score_i - score_{i-1}))
+\sum_{i=1}^{n} (progress_i - progress_{i-1})
 ```
 
   - `n` : Total time steps in episode
-  - In my mind, this should encourage the bot to make forward progress and score points. I had to normalize the score reward since its usually around ~1000
-    - should figure out how to encourage the bot to complete laps faster
+  - In my mind, this should encourage the bot to make forward progress and score points
 
 
 #### Experimental reward function
@@ -79,7 +59,7 @@ n_steps=128,
 n_epochs=3,
 batch_size=32,
 ent_coef=0.01,
-vf_coef=1.0
+vf_coef=1.0,
 
 num_envs=8
 ```
