@@ -164,10 +164,10 @@ def make_retro(
         FixSpeed(_env)
         HotWheelsDiscretizer(_env)
         ClipRewardEnv(_env)
-        EncourageTricks(_env) (optional)
-        CropObservation(_env) (optional)
+        EncourageTricks(_env)        (optional)
+        CropObservation(_env)        (optional)
         MiniMapObservation(_env)     (optional)
-        ResizeObservation(_env, (84,84)) 84,84 default, 56,56 if minimapobs
+        ResizeObservation(_env)      (84,84) default, 56,56 if minimap_obs
     """
     _env = retro.make(
         "HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", **env_kwargs
