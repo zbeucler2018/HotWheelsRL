@@ -66,13 +66,13 @@ def main(
     # setup callbacks
     wandb_callback = WandbCallback(
         # gradient_save_freq=1_000,
-        model_save_path="./models/",
+        model_save_path=f"./models/{_run.name}",
         model_save_freq=25_000,
         verbose=1,
     )
     eval_callback = EvalCallback(
         venv,
-        best_model_save_path=f"./best_model/{_run.id}/",
+        best_model_save_path=f"./best_model/{_run.name}/",
         log_path="./logs/",
         eval_freq=150_000,
         deterministic=True,
