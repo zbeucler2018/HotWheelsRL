@@ -19,6 +19,8 @@ Zack Beucler
 - [stable-retro](https://github.com/Farama-Foundation/stable-retro)
 
 
+- NOTE: `actual_playing.state` is a save file of other maps and challenges in the game.
+
 
 |              | discrete | multidiscrete | multibinary | 
 | ------------ | -------- | ------------- | ----------- |
@@ -60,6 +62,5 @@ n_epochs=3,
 batch_size=32,
 ent_coef=0.01,
 vf_coef=1.0,
-
 num_envs=8
 ```
