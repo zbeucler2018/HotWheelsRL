@@ -10,8 +10,12 @@ from stable_baselines3.common.vec_env import (
     VecTransposeImage,
     DummyVecEnv,
 )
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.atari_wrappers import ClipRewardEnv
+from gymnasium.wrappers import GrayScaleObservation, ResizeObservation
+from gym_wrappers import *
 
-from gym_wrappers import make_retro
+import retro
 
 from utils import print_args
 
@@ -41,6 +45,30 @@ def main(
 
     assert not (minimap_obs and crop_obs), "--minimap_obs or --crop_obs, not both"
 
+    def make_retro():
+        _env = retro.make(
+        "HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array"
+        )
+        _env = Monitor(env=_env)
+        _env = GrayScaleObservation(_env, keep_dim=True)
+        _env = TerminateOnCrash(_env)
+        _env = FixSpeed(_env)
+        _env = HotWheelsDiscretizer(_env)
+        _env = ClipRewardEnv(_env)
+        if encourage_tricks:
+            _env = EncourageTricks(_env)
+        if crop_obs:
+            _env = CropObservation(_env)
+        if minimap_obs:
+            _env = MiniMapObservation(_env)
+            _env = ResizeObservation(_env, (36, 36))  # resize to something compatible
+        else:
+            # minimap obs is smaller than 84x84
+            _env = ResizeObservation(_env, (84, 84))
+        return _env
+
+
+
     # create env
     if num_envs == 1:
         venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_retro]), n_stack=4))
@@ -67,7 +95,7 @@ def main(
     wandb_callback = WandbCallback(
         # gradient_save_freq=1_000,
         model_save_path=f"./models/{_run.name}",
-        model_save_freq=25_000,
+        model_save_freq=50_000,
         verbose=1,
     )
     eval_callback = EvalCallback(
