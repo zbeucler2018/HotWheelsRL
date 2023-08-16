@@ -76,7 +76,7 @@ num_envs=8
   - rank
     - 2008d60 (33590624), |i1
     - retro has a hard time with this one I think. Worst case, extract with lua
-    - 0 is first, 3 is 4th
+    - 0 is 1st, 3 is 4th
   - boost
     - 20070a8, (33583272), <=i4
     - full at 980, empty at 0
@@ -87,10 +87,24 @@ num_envs=8
     - 20070f2, |u1
   - speed
     - 20070a1, <u2
-    - still off like in dino1_single
+    - **still off like in dino1_single**
   - hit wall
     - 20070f0, ><n4,
     - related to lap and rank vars
     - (rank * 1000) + lap = False, ((rank * 1100) + lap) = True
     - if in fourth place and on second lap and collided with wall, than ram value is 3102
       - hit_wall = data.hit_wall == (data.rank * 1100) + lap
+
+### dino2_multi
+  - progress
+  - hit_wall
+  - lap
+  - score
+  - boost
+  - npc_score
+    - same as dino1_multi
+  - rank
+    - can be extracted from hit_wall
+  - laps
+    - extracted from progress
+      - 1 lap 344 (probably 345 is better but it s little over the line)  
