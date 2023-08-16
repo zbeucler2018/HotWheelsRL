@@ -148,7 +148,7 @@ class MiniMapObservation(gym.Wrapper):
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        return observation[95:, :55, :], reward, terminated, truncated, info
+        return observation[94:160, 0:55], reward, terminated, truncated, info
 
 
 def make_retro(
