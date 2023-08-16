@@ -1,6 +1,6 @@
 import gymnasium as gym
 import pygame
-
+import numpy as np
 
 class Viewer(gym.Wrapper):
     """
