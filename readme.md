@@ -98,6 +98,7 @@ num_envs=8
 ### dino2_multi
   - progress
   - hit_wall
+    - 100 = True if in 1st place
   - lap
   - score
   - boost
@@ -105,6 +106,7 @@ num_envs=8
     - same as dino1_multi
   - rank
     - can be extracted from hit_wall
+    - str(hit_wall)[-1]
   - laps
     - extracted from progress
       - 1 lap 344 (probably 345 is better but it s little over the line)  
