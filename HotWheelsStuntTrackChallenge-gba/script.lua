@@ -51,7 +51,12 @@ function calculateSpeedReward()
 	return delta
 end
 
+-- previous_lap = 1
+-- function calculateLapReward()
+
+
+
 
 function calculateReward()
-	return (calculateProgressReward() * 0.8) + (calculateSpeedReward() * 0.2)
+	return (calculateProgressReward() * 0.8) + (calculateSpeedReward() * 0.2) -- (calculateLapReward() * 0.2)
 end
