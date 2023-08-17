@@ -2,6 +2,7 @@ import argparse
 import wandb
 from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.callbacks import EvalCallback, CallbackList
+from callbacks import VideoRecorderCallback
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
@@ -18,6 +19,7 @@ from gym_wrappers import *
 import retro
 
 from utils import print_args
+
 
 
 @print_args
@@ -106,7 +108,8 @@ def main(
         deterministic=True,
         render=False,
     )
-    _callback_list = CallbackList([eval_callback, wandb_callback])
+    video_callback = VideoRecorderCallback(venv, 300_000, 1, True)
+    _callback_list = CallbackList([eval_callback, wandb_callback, video_callback])
 
     # setup model
     if resume:
