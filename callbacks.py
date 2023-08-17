@@ -3,7 +3,6 @@ from typing import Any, Dict
 import gymnasium as gym
 import torch as th
 
-from stable_baselines3 import A2C
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.logger import Video
@@ -53,8 +52,3 @@ class VideoRecorderCallback(BaseCallback):
                 exclude=("stdout", "log", "json", "csv"),
             )
         return True
-
-
-model = A2C("MlpPolicy", "CartPole-v1", tensorboard_log="runs/", verbose=1)
-video_recorder = VideoRecorderCallback(gym.make("CartPole-v1"), render_freq=5000)
-model.learn(total_timesteps=int(5e4), callback=video_recorder)
