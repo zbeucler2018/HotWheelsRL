@@ -33,7 +33,7 @@ Zack Beucler
 - math is probably formatted wrong but idc
 
 ```math
-\sum_{i=1}^{n} (progress_i - progress_{i-1})
+\sum_{i=1}^{n} (d_progress * 0.8) + (d_speed * 0.2)
 ```
 
   - `n` : Total time steps in episode

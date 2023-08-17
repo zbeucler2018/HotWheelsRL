@@ -29,7 +29,7 @@ end
 
 
 previous_progress = 0
-function calculateReward()
+function calculateProgressReward()
 	local current_progress = data.progress
 	local delta = 0
 	if current_progress > previous_progress then
@@ -39,3 +39,19 @@ function calculateReward()
 	return delta
 end
 
+
+previous_speed = 0
+function calculateSpeedReward()
+	local current_speed = data.speed
+	local delta = 0
+	if current_speed > previous_speed then
+		delta = current_speed - previous_speed
+		previous_speed = current_speed
+	end
+	return delta
+end
+
+
+function calculateReward()
+	return (calculateProgressReward() * 0.8) + (calculateSpeedReward() * 0.2)
+end
