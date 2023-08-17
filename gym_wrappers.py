@@ -167,7 +167,7 @@ def make_retro(
         EncourageTricks(_env)        (optional)
         CropObservation(_env)        (optional)
         MiniMapObservation(_env)     (optional)
-        ResizeObservation(_env)      (84,84) default, 56,56 if minimap_obs
+        ResizeObservation(_env)      (56,56)
     """
     _env = retro.make(
         "HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", **env_kwargs
@@ -183,10 +183,7 @@ def make_retro(
         _env = CropObservation(_env)
     if minimap_obs:
         _env = MiniMapObservation(_env)
-        _env = ResizeObservation(_env, (56, 56))  # resize to something compatible
-    else:
-        # minimap obs is smaller than 84x84
-        _env = ResizeObservation(_env, (84, 84))
+    _env = ResizeObservation(_env, (56, 56))
     return _env
 
 
