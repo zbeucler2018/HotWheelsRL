@@ -103,8 +103,8 @@ def main(
     eval_callback = EvalCallback(
         venv,
         best_model_save_path=f"./best_model/{_run.name}/",
-        log_path="./logs/",
-        eval_freq=150_000,
+        log_path=f"./logs/{_run.name}",
+        eval_freq=max(150_000 // num_envs, 1),
         deterministic=True,
         render=False,
     )
