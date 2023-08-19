@@ -5,7 +5,12 @@ import gymnasium as gym
 import numpy as np
 
 from stable_baselines3.common import type_aliases
-from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, VecMonitor, is_vecenv_wrapped
+from stable_baselines3.common.vec_env import (
+    DummyVecEnv,
+    VecEnv,
+    VecMonitor,
+    is_vecenv_wrapped,
+)
 
 
 def evaluate_policy(
@@ -61,7 +66,9 @@ def evaluate_policy(
     if not isinstance(env, VecEnv):
         env = DummyVecEnv([lambda: env])  # type: ignore[list-item, return-value]
 
-    is_monitor_wrapped = is_vecenv_wrapped(env, VecMonitor) or env.env_is_wrapped(Monitor)[0]
+    is_monitor_wrapped = (
+        is_vecenv_wrapped(env, VecMonitor) or env.env_is_wrapped(Monitor)[0]
+    )
 
     if not is_monitor_wrapped and warn:
         warnings.warn(
@@ -78,7 +85,9 @@ def evaluate_policy(
 
     episode_counts = np.zeros(n_envs, dtype="int")
     # Divides episodes among different sub environments in the vector as evenly as possible
-    episode_count_targets = np.array([(n_eval_episodes + i) // n_envs for i in range(n_envs)], dtype="int")
+    episode_count_targets = np.array(
+        [(n_eval_episodes + i) // n_envs for i in range(n_envs)], dtype="int"
+    )
 
     current_rewards = np.zeros(n_envs)
     current_lengths = np.zeros(n_envs, dtype="int")
@@ -119,7 +128,7 @@ def evaluate_policy(
                             episode_lengths.append(info["episode"]["l"])
                             # Only increment at the real end of an episode
                             episode_counts[i] += 1
-                        episode_progresses.append(info['progress'])
+                        episode_progresses.append(info["progress"])
                     else:
                         episode_rewards.append(current_rewards[i])
                         episode_lengths.append(current_lengths[i])
@@ -135,7 +144,10 @@ def evaluate_policy(
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
     if reward_threshold is not None:
-        assert mean_reward > reward_threshold, "Mean reward below threshold: " f"{mean_reward:.2f} < {reward_threshold:.2f}"
+        assert mean_reward > reward_threshold, (
+            "Mean reward below threshold: "
+            f"{mean_reward:.2f} < {reward_threshold:.2f}"
+        )
     if return_episode_rewards:
         return episode_rewards, episode_lengths, episode_progresses
     return mean_reward, std_reward

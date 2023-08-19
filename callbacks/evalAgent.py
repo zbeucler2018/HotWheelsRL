@@ -3,7 +3,6 @@ from typing import Any, Dict
 import gymnasium as gym
 
 from stable_baselines3.common.callbacks import BaseCallback
-    
 
 
 import os
@@ -15,10 +14,15 @@ import gymnasium as gym
 import numpy as np
 
 from stable_baselines3.common.logger import Logger
-from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
+from stable_baselines3.common.vec_env import (
+    DummyVecEnv,
+    VecEnv,
+    sync_envs_normalization,
+)
 from stable_baselines3.common.callbacks import EventCallback
 
 from .eval_policy import evaluate_policy
+
 
 class EvalCallback(EventCallback):
     """
@@ -97,7 +101,10 @@ class EvalCallback(EventCallback):
     def _init_callback(self) -> None:
         # Does not work in some corner cases, where the wrapper is not the same
         if not isinstance(self.training_env, type(self.eval_env)):
-            warnings.warn("Training and eval env are not of the same type" f"{self.training_env} != {self.eval_env}")
+            warnings.warn(
+                "Training and eval env are not of the same type"
+                f"{self.training_env} != {self.eval_env}"
+            )
 
         # Create folders if needed
         if self.best_model_save_path is not None:
@@ -109,7 +116,9 @@ class EvalCallback(EventCallback):
         if self.callback_on_new_best is not None:
             self.callback_on_new_best.init_callback(self.model)
 
-    def _log_success_callback(self, locals_: Dict[str, Any], globals_: Dict[str, Any]) -> None:
+    def _log_success_callback(
+        self, locals_: Dict[str, Any], globals_: Dict[str, Any]
+    ) -> None:
         """
         Callback passed to the  ``evaluate_policy`` function
         in order to log the success rate (when applicable),
@@ -174,19 +183,23 @@ class EvalCallback(EventCallback):
                 )
 
             mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
-            mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(episode_lengths)
+            mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(
+                episode_lengths
+            )
             mean_progress = np.mean(episode_progresses)
             self.last_mean_reward = mean_reward
 
             if self.verbose >= 1:
-                print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
+                print(
+                    f"Eval num_timesteps={self.num_timesteps}, "
+                    f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}"
+                )
                 print(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
                 print(f"Episode progress: {mean_progress}")
             # Add to current Logger
             self.logger.record("eval/mean_reward", float(mean_reward))
             self.logger.record("eval/mean_ep_length", mean_ep_length)
             self.logger.record("eval/mean_progress", mean_progress)
-
 
             if len(self._is_success_buffer) > 0:
                 success_rate = np.mean(self._is_success_buffer)
@@ -195,14 +208,18 @@ class EvalCallback(EventCallback):
                 self.logger.record("eval/success_rate", success_rate)
 
             # Dump log so the evaluation results are printed with the correct timestep
-            self.logger.record("time/total_timesteps", self.num_timesteps, exclude="tensorboard")
+            self.logger.record(
+                "time/total_timesteps", self.num_timesteps, exclude="tensorboard"
+            )
             self.logger.dump(self.num_timesteps)
 
             if mean_reward > self.best_mean_reward:
                 if self.verbose >= 1:
                     print("New best mean reward!")
                 if self.best_model_save_path is not None:
-                    self.model.save(os.path.join(self.best_model_save_path, "best_model"))
+                    self.model.save(
+                        os.path.join(self.best_model_save_path, "best_model")
+                    )
                 self.best_mean_reward = mean_reward
                 # Trigger callback on new best model, if needed
                 if self.callback_on_new_best is not None:
