@@ -1,8 +1,9 @@
 import argparse
 import wandb
 from wandb.integration.sb3 import WandbCallback
-from stable_baselines3.common.callbacks import EvalCallback, CallbackList
-from callbacks import VideoRecorderCallback
+from stable_baselines3.common.callbacks import CallbackList
+from callbacks.videoRecorder import VideoRecorderCallback
+from callbacks.evalAgent import EvalCallback
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
@@ -104,11 +105,11 @@ def main(
         venv,
         best_model_save_path=f"./best_model/{_run.name}/",
         log_path=f"./logs/{_run.name}",
-        eval_freq=max(150_000 // num_envs, 1),
+        eval_freq=max(1000 // num_envs, 1),
         deterministic=True,
         render=False,
     )
-    video_callback = VideoRecorderCallback(venv, 300_000, 1, True)
+    video_callback = VideoRecorderCallback(venv, max(1000 // num_envs, 1), 1, True)
     _callback_list = CallbackList([eval_callback, wandb_callback, video_callback])
 
     # setup model
