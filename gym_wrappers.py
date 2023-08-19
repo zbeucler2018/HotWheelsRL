@@ -151,48 +151,37 @@ class MiniMapObservation(gym.Wrapper):
         return observation[94:160, 0:55], reward, terminated, truncated, info
 
 
-def make_retro(
-    encourage_tricks: bool = False,
-    crop_obs: bool = False,
-    minimap_obs: bool = False,
-    **env_kwargs
-):
+class IncreaseMeanSpeed(gym.Wrapper):
     """
-    Makes retro env with these wrappers
-        TerminateOnCrash(_env)
-        Monitor(_env)
-        FixSpeed(_env)
-        HotWheelsDiscretizer(_env)
-        ClipRewardEnv(_env)
-        EncourageTricks(_env)        (optional)
-        CropObservation(_env)        (optional)
-        MiniMapObservation(_env)     (optional)
-        ResizeObservation(_env)      (56,56)
+    Gives reward if mean speed has been increased
     """
-    _env = retro.make(
-        "HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array", **env_kwargs
-    )
-    _env = Monitor(env=_env)
-    _env = TerminateOnCrash(_env)
-    _env = FixSpeed(_env)
-    _env = HotWheelsDiscretizer(_env)
-    _env = ClipRewardEnv(_env)
-    if encourage_tricks:
-        _env = EncourageTricks(_env)
-    if crop_obs:
-        _env = CropObservation(_env)
-    if minimap_obs:
-        _env = MiniMapObservation(_env)
-    _env = ResizeObservation(_env, (56, 56))
-    return _env
 
+    def __init__(self, env: gym.Env):
+        super().__init__(env)
+        self._env = env
+        self.speeds = []
+        self.mean_speed = 0
 
-def render(model_path, **env_kwargs):
-    # TODO
-    _env = make_retro(**env_kwargs)
-    pass
+    def reset(self, **kwargs):
+        self.speeds = []
+        self.mean_speed = 0
+        return super().reset(**kwargs)
 
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self._env.step(action)
 
-def save_video(model_path):
-    # TODO
-    pass
+        self.speeds.append(info["speed"])
+
+        # calc new mean speed
+        new_mean_speed = np.mean(self.speeds)
+
+        # compare to old mean speed
+        if new_mean_speed > self.mean_speed:
+            reward += 0.1
+        else:
+            reward -= 0.1
+
+        # update mean speed
+        self.mean_speed = new_mean_speed
+
+        return observation, reward, terminated, truncated, info
