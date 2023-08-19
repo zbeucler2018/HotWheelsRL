@@ -9,7 +9,13 @@ from stable_baselines3.common.logger import Video
 
 
 class VideoRecorderCallback(BaseCallback):
-    def __init__(self, eval_env: gym.Env, render_freq: int, n_eval_episodes: int = 1, deterministic: bool = True):
+    def __init__(
+        self,
+        eval_env: gym.Env,
+        render_freq: int,
+        n_eval_episodes: int = 1,
+        deterministic: bool = True,
+    ):
         """
         Records a video of an agent's trajectory traversing ``eval_env`` and logs it to TensorBoard
 

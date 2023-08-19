@@ -1,8 +1,9 @@
 import argparse
 import wandb
 from wandb.integration.sb3 import WandbCallback
-from stable_baselines3.common.callbacks import EvalCallback, CallbackList
-from callbacks import VideoRecorderCallback
+from stable_baselines3.common.callbacks import CallbackList
+from callbacks.videoRecorder import VideoRecorderCallback
+from callbacks.evalAgent import EvalCallback
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
@@ -19,7 +20,6 @@ from gym_wrappers import *
 import retro
 
 from utils import print_args
-
 
 
 @print_args
@@ -48,9 +48,7 @@ def main(
     assert not (minimap_obs and crop_obs), "--minimap_obs or --crop_obs, not both"
 
     def make_retro():
-        _env = retro.make(
-        "HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array"
-        )
+        _env = retro.make("HotWheelsStuntTrackChallenge-gba", render_mode="rgb_array")
         _env = Monitor(env=_env)
         _env = GrayScaleObservation(_env, keep_dim=True)
         _env = TerminateOnCrash(_env)
@@ -68,8 +66,6 @@ def main(
             # minimap obs is smaller than 84x84
             _env = ResizeObservation(_env, (84, 84))
         return _env
-
-
 
     # create env
     if num_envs == 1:
@@ -108,7 +104,7 @@ def main(
         deterministic=True,
         render=False,
     )
-    video_callback = VideoRecorderCallback(venv, 300_000, 1, True)
+    video_callback = VideoRecorderCallback(venv, 1_000_000, 1, True)
     _callback_list = CallbackList([eval_callback, wandb_callback, video_callback])
 
     # setup model
