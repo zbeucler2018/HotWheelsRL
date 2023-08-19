@@ -105,11 +105,16 @@ def main(
         venv,
         best_model_save_path=f"./best_model/{_run.name}/",
         log_path=f"./logs/{_run.name}",
-        eval_freq=max(1000 // num_envs, 1),
+        eval_freq=max(150_000 // num_envs, 1),
         deterministic=True,
         render=False,
     )
-    video_callback = VideoRecorderCallback(venv, max(1000 // num_envs, 1), 1, True)
+    video_callback = VideoRecorderCallback(
+        venv, 
+        1_000_000,
+        1, 
+        True
+    )
     _callback_list = CallbackList([eval_callback, wandb_callback, video_callback])
 
     # setup model
