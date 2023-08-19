@@ -29,6 +29,7 @@ def main(
     run_id,
     model_path,
     num_envs,
+    encourage_speed,
     encourage_tricks,
     crop_obs,
     minimap_obs,
@@ -54,7 +55,8 @@ def main(
         _env = TerminateOnCrash(_env)
         _env = FixSpeed(_env)
         _env = HotWheelsDiscretizer(_env)
-        _env = ClipRewardEnv(_env)
+        if encourage_speed:
+            _env = IncreaseMeanSpeed(_env)
         if encourage_tricks:
             _env = EncourageTricks(_env)
         if crop_obs:
@@ -156,6 +158,11 @@ if __name__ == "__main__":
         default=8,
     )
     parser.add_argument(
+        "--encourage_speed",
+        help="Give a reward increasing mean speed (0.1 or -0.1)",
+        action="store_true",
+    )
+    parser.add_argument(
         "--encourage_tricks",
         help="Give a reward for doing tricks and increasing score",
         action="store_true",
@@ -179,6 +186,7 @@ if __name__ == "__main__":
         run_id=args.run_id,
         model_path=args.model_path,
         num_envs=args.num_envs,
+        encourage_speed=args.encourage_speed,
         encourage_tricks=args.encourage_tricks,
         crop_obs=args.crop_obs,
         minimap_obs=args.minimap_obs,

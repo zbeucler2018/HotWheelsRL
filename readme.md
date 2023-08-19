@@ -31,9 +31,11 @@ Zack Beucler
 
 # Reward function
 - math is probably formatted wrong but idc
+- speed reward:
+  - +/- 0.1 if mean speed increases/decreases
 
 ```math
-\sum_{i=1}^{n} (d_progress * 0.8) + (d_speed * 0.2)
+\sum_{i=1}^{n} \delta progress
 ```
 
   - `n` : Total time steps in episode
