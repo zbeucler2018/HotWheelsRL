@@ -93,7 +93,7 @@ def evaluate_policy(
     current_lengths = np.zeros(n_envs, dtype="int")
     observations = env.reset()
     states = None
-    episode_starts = np.ones((env.num_envs,), dtype=bool)
+    episode_starts = np.ones((env.unwrapped.num_envs,), dtype=bool)
     while (episode_counts < episode_count_targets).any():
         actions, states = model.predict(
             observations,  # type: ignore[arg-type]
