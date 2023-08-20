@@ -19,7 +19,7 @@ from gym_wrappers import *
 
 import retro
 
-from utils import print_args
+from utils import print_args, in_colab
 
 
 @print_args
@@ -33,7 +33,7 @@ def main(
     encourage_tricks,
     crop_obs,
     minimap_obs,
-    trim_obs
+    trim_obs,
 ) -> None:
     # check if we want to resume
     if resume or run_id:
@@ -62,11 +62,12 @@ def main(
             _env = EncourageTricks(_env)
         if crop_obs:
             _env = CropObservation(_env)
+        if trim_obs:
+            _env = NavObservation(_env)
+
         if minimap_obs:
             _env = MiniMapObservation(_env)
             _env = ResizeObservation(_env, (36, 36))  # resize to something compatible
-        if trim_obs:
-            _env = NavObservation(_env)
         else:
             # minimap obs is smaller than 84x84
             _env = ResizeObservation(_env, (84, 84))
@@ -96,15 +97,25 @@ def main(
     )
 
     # setup callbacks
+    _model_save_path = (
+        f"/content/gdrive/MyDrive/HotWheelsRL/data/models/{_run.name}"
+        if in_colab()
+        else f"./models/{_run.name}"
+    )
     wandb_callback = WandbCallback(
         # gradient_save_freq=1_000,
-        model_save_path=f"./models/{_run.name}",
+        model_save_path=_model_save_path,
         model_save_freq=50_000,
         verbose=1,
     )
+    _best_model_save_path = (
+        f"/content/gdrive/MyDrive/HotWheelsRL/data/best_models/{_run.name}"
+        if in_colab()
+        else f"./best_models/{_run.name}"
+    )
     eval_callback = EvalCallback(
         venv,
-        best_model_save_path=f"./best_model/{_run.name}/",
+        best_model_save_path=_best_model_save_path,
         log_path=f"./logs/{_run.name}",
         eval_freq=max(150_000 // num_envs, 1),
         deterministic=True,
@@ -199,5 +210,5 @@ if __name__ == "__main__":
         encourage_tricks=args.encourage_tricks,
         crop_obs=args.crop_obs,
         minimap_obs=args.minimap_obs,
-        trim_obs=args.trim_obs
+        trim_obs=args.trim_obs,
     )

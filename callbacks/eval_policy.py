@@ -78,7 +78,7 @@ def evaluate_policy(
             UserWarning,
         )
 
-    n_envs = env.num_envs
+    n_envs = env.unwrapped.num_envs
     episode_rewards = []
     episode_lengths = []
     episode_progresses = []

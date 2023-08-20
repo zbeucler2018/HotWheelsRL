@@ -189,7 +189,7 @@ class IncreaseMeanSpeed(gym.Wrapper):
 
 class NavObservation(gym.Wrapper):
     """
-    Crops observation such that the speed dial, 
+    Crops observation such that the speed dial,
     mini map, and lap/race timer are not included.
     Resulting obs shape is (130, 120)
     """
