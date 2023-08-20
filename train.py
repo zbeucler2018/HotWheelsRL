@@ -14,7 +14,7 @@ from stable_baselines3.common.vec_env import (
 )
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv
-from gymnasium.wrappers import GrayScaleObservation, ResizeObservation
+from gymnasium.wrappers import GrayScaleObservation, ResizeObservation, NormalizeReward
 from gym_wrappers import *
 
 import retro
@@ -33,6 +33,7 @@ def main(
     encourage_tricks,
     crop_obs,
     minimap_obs,
+    trim_obs
 ) -> None:
     # check if we want to resume
     if resume or run_id:
@@ -64,9 +65,12 @@ def main(
         if minimap_obs:
             _env = MiniMapObservation(_env)
             _env = ResizeObservation(_env, (36, 36))  # resize to something compatible
+        if trim_obs:
+            _env = NavObservation(_env)
         else:
             # minimap obs is smaller than 84x84
             _env = ResizeObservation(_env, (84, 84))
+        _env = NormalizeReward(_env)
         return _env
 
     # create env
@@ -169,12 +173,17 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--crop_obs",
-        help="Crop the observation so the model isn't given the entire obs, just a section with the car in it",
+        help="Crop the observation so the model isn't given the entire obs, just a section with the car in it. Smaller than trim_obs",
         action="store_true",
     )
     parser.add_argument(
         "--minimap_obs",
         help="Crop the observation so the model is given only the minimap",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--trim_obs",
+        help="Crop the observation such that the lap/race timers, speed dial, and minimap are not shown",
         action="store_true",
     )
 
@@ -190,4 +199,5 @@ if __name__ == "__main__":
         encourage_tricks=args.encourage_tricks,
         crop_obs=args.crop_obs,
         minimap_obs=args.minimap_obs,
+        trim_obs=args.trim_obs
     )
