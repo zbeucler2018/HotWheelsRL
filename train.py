@@ -56,6 +56,7 @@ def main(
         _env = Monitor(env=_env)
         _env = GrayScaleObservation(_env, keep_dim=True)
         _env = TerminateOnCrash(_env)
+        _env = PenalizeHittingWalls(_env)
         _env = FixSpeed(_env)
         _env = HotWheelsDiscretizer(_env)
         if encourage_speed:
@@ -136,7 +137,7 @@ def main(
         model = PPO.load(
             path=model_path,
             env=venv,
-            # Needed because sometimes it cant find the 
+            # Needed because sometimes sb3 cant find the 
             # obs and action space. Seen in colab on 8/21/23
             custom_objects={
                 "observation_space": venv.observation_space,

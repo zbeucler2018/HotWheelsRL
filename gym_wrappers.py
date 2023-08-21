@@ -200,3 +200,19 @@ class NavObservation(gym.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         return observation[30:240, 55:175], reward, terminated, truncated, info
+
+
+class PenalizeHittingWalls(gym.Wrapper):
+    """
+    Penalizes the agent for 
+    hitting a wall
+    """
+    def __init__(self, env):
+        super().__init__(env)
+
+    def step(self, action):
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        # TODO: make this better lol
+        if info['hit_wall'] in [101, 201, 301]:
+            reward -= 5
+        return observation, reward, terminated, truncated, info
