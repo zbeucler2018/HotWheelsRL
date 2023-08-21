@@ -13,13 +13,15 @@ from stable_baselines3.common.vec_env import (
     DummyVecEnv,
 )
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.atari_wrappers import ClipRewardEnv
 from gymnasium.wrappers import GrayScaleObservation, ResizeObservation, NormalizeReward
 from gym_wrappers import *
 
 import retro
 
 from utils import print_args, in_colab
+
+IN_COLAB = in_colab()
+print(f"Running in colab: {IN_COLAB}")
 
 
 @print_args
@@ -99,7 +101,7 @@ def main(
     # setup callbacks
     _model_save_path = (
         f"/content/gdrive/MyDrive/HotWheelsRL/data/models/{_run.name}"
-        if in_colab()
+        if IN_COLAB
         else f"./models/{_run.name}"
     )
     wandb_callback = WandbCallback(
@@ -110,18 +112,23 @@ def main(
     )
     _best_model_save_path = (
         f"/content/gdrive/MyDrive/HotWheelsRL/data/best_models/{_run.name}"
-        if in_colab()
+        if IN_COLAB
         else f"./best_models/{_run.name}"
     )
     eval_callback = EvalCallback(
         venv,
         best_model_save_path=_best_model_save_path,
         log_path=f"./logs/{_run.name}",
-        eval_freq=max(5_000_000 // num_envs, 1),
+        eval_freq=max(1_000_000 // num_envs, 1),
         deterministic=True,
         render=False,
     )
-    video_callback = VideoRecorderCallback(venv, 10_000_000, 1, True)
+    video_callback = VideoRecorderCallback(
+        env=venv, 
+        render_freq=5_000_000, 
+        n_eval_episodes=1, 
+        deterministic=True
+    )
     _callback_list = CallbackList([eval_callback, wandb_callback, video_callback])
 
     # setup model
