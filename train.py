@@ -126,7 +126,16 @@ def main(
 
     # setup model
     if resume:
-        model = PPO.load(path=model_path, env=venv)
+        model = PPO.load(
+            path=model_path,
+            env=venv,
+            # Needed because sometimes it cant find the 
+            # obs and action space. Seen in colab on 8/21/23
+            custom_objects={
+                "observation_space": venv.observation_space,
+                "action_space": venv.action_space,
+            },
+        )
     else:
         model = PPO(
             "CnnPolicy",
