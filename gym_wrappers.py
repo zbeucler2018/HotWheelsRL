@@ -90,19 +90,24 @@ class EncourageTricks(gym.Wrapper):
 
 class TerminateOnCrash(gym.Wrapper):
     """
-    A wrapper that ends the episode if the mean of the observation is above a certain threshold.
+    A wrapper that ends the episode if the mean of the 
+    observation is above a certain threshold.
+    Also applies a penality.
     Triggered when screen turns white after crash
     """
 
-    def __init__(self, env, threshold=238):
+    def __init__(self, env, threshold=238, penality=-5):
         super().__init__(env)
-        self.crash_restart_threshold = threshold
+        self.crash_restart_obs_threshold = threshold
+        self.crash_penality = penality
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         mean_obs = observation.mean()
-        if mean_obs >= self.crash_restart_threshold:
+        if mean_obs >= self.crash_restart_obs_threshold:
             terminated = True
+            reward -= self.crash_penality
+
         return observation, reward, terminated, truncated, info
 
 
