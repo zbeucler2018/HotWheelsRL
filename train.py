@@ -125,7 +125,7 @@ def main(
         render=False,
     )
     video_callback = VideoRecorderCallback(
-        env=venv, 
+        eval_env=venv, 
         render_freq=5_000_000, 
         n_eval_episodes=1, 
         deterministic=True

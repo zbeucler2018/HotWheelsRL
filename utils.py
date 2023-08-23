@@ -39,7 +39,7 @@ def in_colab() -> bool:
     """
     Returns true if in colab notebook
     """
-    return "google.colab" in sys.modules
+    return os.getenv("COLAB_RELEASE_TAG") is not None
 
 
 def get_num_cpus() -> int:
