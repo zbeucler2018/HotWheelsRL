@@ -9,6 +9,7 @@ import argparse
 import gymnasium as gym
 import numpy as np
 from gymnasium.wrappers.time_limit import TimeLimit
+from stable_baselines3.common.monitor import Monitor
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
@@ -78,6 +79,7 @@ def make_retro(*, game, state=None, max_episode_steps=4500, render_mode="rgb_arr
     if state is None:
         state = retro.State.DEFAULT
     env = retro.make(game, state, render_mode=render_mode, **kwargs)
+    env = Monitor(env)
     env = StochasticFrameSkip(env, n=4, stickprob=0.25)
     env = TerminateOnCrash(env)
     env = PenalizeHittingWalls(env)
@@ -142,6 +144,7 @@ def main():
         clip_range=0.1,
         ent_coef=0.01,
         verbose=1,
+        tensorboard_log="./logs/",
     )
 
 
@@ -165,9 +168,9 @@ def main():
         else f"./models/{_run.name}"
     )
     wandb_callback = WandbCallback(
-        gradient_save_freq=100_000,
+        gradient_save_freq=10_000,
         model_save_path=_model_save_path,
-        model_save_freq=100_000,
+        model_save_freq=50_000,
         verbose=1,
     )
     _best_model_save_path = (
@@ -179,7 +182,7 @@ def main():
         venv,
         best_model_save_path=_best_model_save_path,
         log_path=f"./logs/{_run.name}",
-        eval_freq=max(1_000_000 // args.num_envs, 1),
+        eval_freq=max(100_000 // args.num_envs, 1),
         deterministic=True,
         render=False,
     )
@@ -190,7 +193,6 @@ def main():
         total_timesteps=args.total_steps,
         log_interval=1,
         callback=_callback_list,
-        tensorboard_log="./logs/",
     )
 
 
