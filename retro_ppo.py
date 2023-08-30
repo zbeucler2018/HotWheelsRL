@@ -35,7 +35,7 @@ from wandb.integration.sb3 import WandbCallback
 
 
 def make_retro(
-    *, game, state=None, max_episode_steps=4500, render_mode="rgb_array", **kwargs
+    *, game, state=None, max_episode_steps=5100, render_mode="rgb_array", **kwargs
 ):
     if state is None:
         state = retro.State.DEFAULT
@@ -47,6 +47,7 @@ def make_retro(
     env = HotWheelsDiscretizer(env)
 
     if max_episode_steps is not None:
+        # 5100 (1700*3) frames to complete 3 laps and be 4th vs NPCs
         env = TimeLimit(env, max_episode_steps=max_episode_steps)
     return env
 
@@ -72,6 +73,21 @@ def main():
     venv = VecTransposeImage(
         VecFrameStack(SubprocVecEnv([make_env] * args.num_envs), n_stack=4)
     )
+
+    # setup wandb
+    _run = wandb.init(
+        project="sb3-hotwheels",
+        config={
+            "algorithm": "PPO",
+            "total_training_steps": args.total_steps,
+            "framestack": True,
+        },
+        monitor_gym=True,
+        sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
+        resume=True if args.resume else None,
+        id=args.run_id if args.run_id else None,
+    )
+
     if args.resume:
         model = PPO.load(
             path=args.model_path,
@@ -96,23 +112,9 @@ def main():
             clip_range=0.1,
             ent_coef=0.01,
             verbose=1,
-            tensorboard_log="./logs/",
+            tensorboard_log=f"./logs/{_run.name}",
         )
 
-    # setup wandb
-    _config = {
-        "algorithm": "PPO",
-        "total_training_steps": args.total_steps,
-        "framestack": True,
-    }
-    _run = wandb.init(
-        project="sb3-hotwheels",
-        config=_config,
-        monitor_gym=True,
-        sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-        resume=True if args.resume else None,
-        id=args.run_id if args.run_id else None,
-    )
     # setup callbacks
     _model_save_path = (
         f"/content/gdrive/MyDrive/HotWheelsRL/data/models/{_run.name}"
