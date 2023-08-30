@@ -1,7 +1,8 @@
 import os
 import multiprocessing
-import sys
+import argparse
 import retro
+import sys
 
 
 def get_retro_install_path(verbose: bool = False) -> str:
@@ -62,3 +63,59 @@ def print_args(func: callable):
         return func(**kwargs)
 
     return _wrapper
+
+
+def parse_args(parser: argparse.ArgumentParser):
+    """
+    Parses arguments for CLI scripts
+    """
+    parser.add_argument("--game", default="HotWheelsStuntTrackChallenge-gba")
+    parser.add_argument("--state", default=retro.State.DEFAULT)
+    parser.add_argument("--scenario", default=None)
+    parser.add_argument(
+        "--total_steps", help="Total steps to train", type=int, required=True
+    )
+    parser.add_argument(
+        "--num_envs",
+        help="Number of envs to train at the same time. Default is 8",
+        type=int,
+        required=False,
+        default=8,
+    )
+
+    parser.add_argument("--resume", help="Resume training a model", action="store_true")
+    parser.add_argument(
+        "--run_id", help="Wandb run ID to resume training a model", type=str
+    )
+    parser.add_argument(
+        "--model_path", help="Path to saved model to resume training", type=str
+    )
+
+    parser.add_argument(
+        "--trim_obs",
+        help="Crop the observation such that the lap/race timers, speed dial, and minimap are not shown",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--minimap_obs",
+        help="Crop the observation so the model is given only the minimap",
+        action="store_true",
+    )
+
+    _args = parser.parse_args()
+
+    # check for illegal resume options
+    if (_args.resume or _args.run_id or _args.model_path) and not all(
+        [_args.resume, _args.run_id, _args.model_path]
+    ):
+        print(
+            f"--resume , --run_id , and --model_path must be defined to resume training"
+        )
+        sys.exit(2)
+
+    # check for illegal obs options
+    if sum([_args.trim_obs, _args.minimap_obs]) > 1:
+        print(f"Only one obs flag (--trim_obs, --minimap_obs) can be used at a time")
+        sys.exit(2)
+
+    return _args

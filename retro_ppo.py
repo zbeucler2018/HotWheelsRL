@@ -19,7 +19,7 @@ from stable_baselines3.common.vec_env import (
     VecTransposeImage,
 )
 
-from utils import print_args, in_colab
+from utils import print_args, in_colab, parse_args
 
 IN_COLAB = in_colab()
 print(f"Running in colab: {IN_COLAB}")
@@ -62,28 +62,7 @@ def wrap_deepmind_retro(env):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--game", default="HotWheelsStuntTrackChallenge-gba")
-    parser.add_argument("--state", default=retro.State.DEFAULT)
-    parser.add_argument("--scenario", default=None)
-    parser.add_argument(
-        "--total_steps", help="Total steps to train", type=int, required=True
-    )
-    parser.add_argument("--resume", help="Resume training a model", action="store_true")
-    parser.add_argument(
-        "--run_id", help="Wandb run ID to resume training a model", type=str
-    )
-    parser.add_argument(
-        "--model_path", help="Path to saved model to resume training", type=str
-    )
-    parser.add_argument(
-        "--num_envs",
-        help="Number of envs to train at the same time. Default is 8",
-        type=int,
-        required=False,
-        default=8,
-    )
-
-    args = parser.parse_args()
+    args = parse_args(parser)
 
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
