@@ -129,6 +129,7 @@ def main():
     _run = wandb.init(
         project="sb3-hotwheels",
         config=_config,
+        monitor_gym=True,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,
@@ -160,11 +161,16 @@ def main():
     )
     _callback_list = CallbackList([eval_callback, wandb_callback])
 
-    model.learn(
-        total_timesteps=args.total_steps,
-        log_interval=1,
-        callback=_callback_list,
-    )
+    try:
+        model.learn(
+            total_timesteps=args.total_steps,
+            log_interval=1,
+            callback=_callback_list,
+            reset_num_timesteps=False if args.resume else True,
+        )
+    finally:
+        venv.close()
+        _run.finish()
 
 
 if __name__ == "__main__":
