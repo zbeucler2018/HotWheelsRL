@@ -131,21 +131,32 @@ def main():
         return env
 
     venv = VecTransposeImage(VecFrameStack(SubprocVecEnv([make_env] * args.num_envs), n_stack=4))
-    
-    model = PPO(
-        policy="CnnPolicy",
-        env=venv,
-        learning_rate=lambda f: f * 2.5e-4,
-        n_steps=128,
-        batch_size=32,
-        n_epochs=4,
-        gamma=0.99,
-        gae_lambda=0.95,
-        clip_range=0.1,
-        ent_coef=0.01,
-        verbose=1,
-        tensorboard_log="./logs/",
-    )
+    if args.resume:
+        model = PPO.load(
+            path=args.model_path,
+            env=venv,
+            # Needed because sometimes sb3 cant find the 
+            # obs and action space. Seen in colab on 8/21/23
+            custom_objects={
+                "observation_space": venv.observation_space,
+                "action_space": venv.action_space,
+            },
+        )
+    else:
+        model = PPO(
+            policy="CnnPolicy",
+            env=venv,
+            learning_rate=lambda f: f * 2.5e-4,
+            n_steps=128,
+            batch_size=32,
+            n_epochs=4,
+            gamma=0.99,
+            gae_lambda=0.95,
+            clip_range=0.1,
+            ent_coef=0.01,
+            verbose=1,
+            tensorboard_log="./logs/",
+        )
 
 
     # setup wandb
