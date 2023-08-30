@@ -90,7 +90,7 @@ class EncourageTricks(gym.Wrapper):
 
 class TerminateOnCrash(gym.Wrapper):
     """
-    A wrapper that ends the episode if the mean of the 
+    A wrapper that ends the episode if the mean of the
     observation is above a certain threshold.
     Also applies a penality.
     Triggered when screen turns white after crash
@@ -209,15 +209,63 @@ class NavObservation(gym.Wrapper):
 
 class PenalizeHittingWalls(gym.Wrapper):
     """
-    Penalizes the agent for 
+    Penalizes the agent for
     hitting a wall
     """
+
     def __init__(self, env):
         super().__init__(env)
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         # TODO: make this better lol
-        if info['hit_wall'] in [101, 201, 301]:
+        if info["hit_wall"] in [101, 201, 301]:
             reward -= 5
         return observation, reward, terminated, truncated, info
+
+
+class StochasticFrameSkip(gym.Wrapper):
+    """
+    Frameskip with randomness.
+    n: frames to skip
+    stickprob: potential to pick another action and use it instead
+    """
+
+    def __init__(self, env: gym.Env, n, stickprob):
+        gym.Wrapper.__init__(self, env)
+        self.n = n
+        self.stickprob = stickprob
+        self.curac = None
+        self.rng = np.random.RandomState()
+        self.supports_want_render = hasattr(env.unwrapped, "supports_want_render")
+
+    def reset(self, **kwargs):
+        self.curac = None
+        return self.env.reset(**kwargs)
+
+    def step(self, ac):
+        terminated = False
+        truncated = False
+        totrew = 0
+        for i in range(self.n):
+            # First step after reset, use action
+            if self.curac is None:
+                self.curac = ac
+            # First substep, delay with probability=stickprob
+            elif i == 0:
+                if self.rng.rand() > self.stickprob:
+                    self.curac = ac
+            # Second substep, new action definitely kicks in
+            elif i == 1:
+                self.curac = ac
+            if self.supports_want_render and i < self.n - 1:
+                ob, rew, terminated, truncated, info = self.env.step(
+                    self.curac,
+                    want_render=False,
+                )
+            else:
+                ob, rew, terminated, truncated, info = self.env.step(self.curac)
+            totrew += rew
+            if terminated or truncated:
+                break
+        return ob, totrew, terminated, truncated, info

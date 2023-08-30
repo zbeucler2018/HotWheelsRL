@@ -34,48 +34,9 @@ import wandb
 from wandb.integration.sb3 import WandbCallback
 
 
-class StochasticFrameSkip(gym.Wrapper):
-    def __init__(self, env, n, stickprob):
-        gym.Wrapper.__init__(self, env)
-        self.n = n
-        self.stickprob = stickprob
-        self.curac = None
-        self.rng = np.random.RandomState()
-        self.supports_want_render = hasattr(env, "supports_want_render")
-
-    def reset(self, **kwargs):
-        self.curac = None
-        return self.env.reset(**kwargs)
-
-    def step(self, ac):
-        terminated = False
-        truncated = False
-        totrew = 0
-        for i in range(self.n):
-            # First step after reset, use action
-            if self.curac is None:
-                self.curac = ac
-            # First substep, delay with probability=stickprob
-            elif i == 0:
-                if self.rng.rand() > self.stickprob:
-                    self.curac = ac
-            # Second substep, new action definitely kicks in
-            elif i == 1:
-                self.curac = ac
-            if self.supports_want_render and i < self.n - 1:
-                ob, rew, terminated, truncated, info = self.env.step(
-                    self.curac,
-                    want_render=False,
-                )
-            else:
-                ob, rew, terminated, truncated, info = self.env.step(self.curac)
-            totrew += rew
-            if terminated or truncated:
-                break
-        return ob, totrew, terminated, truncated, info
-
-
-def make_retro(*, game, state=None, max_episode_steps=4500, render_mode="rgb_array", **kwargs):
+def make_retro(
+    *, game, state=None, max_episode_steps=4500, render_mode="rgb_array", **kwargs
+):
     if state is None:
         state = retro.State.DEFAULT
     env = retro.make(game, state, render_mode=render_mode, **kwargs)
@@ -122,7 +83,6 @@ def main():
         default=8,
     )
 
-
     args = parser.parse_args()
 
     def make_env():
@@ -130,12 +90,14 @@ def main():
         env = wrap_deepmind_retro(env)
         return env
 
-    venv = VecTransposeImage(VecFrameStack(SubprocVecEnv([make_env] * args.num_envs), n_stack=4))
+    venv = VecTransposeImage(
+        VecFrameStack(SubprocVecEnv([make_env] * args.num_envs), n_stack=4)
+    )
     if args.resume:
         model = PPO.load(
             path=args.model_path,
             env=venv,
-            # Needed because sometimes sb3 cant find the 
+            # Needed because sometimes sb3 cant find the
             # obs and action space. Seen in colab on 8/21/23
             custom_objects={
                 "observation_space": venv.observation_space,
@@ -158,7 +120,6 @@ def main():
             tensorboard_log="./logs/",
         )
 
-
     # setup wandb
     _config = {
         "algorithm": "PPO",
@@ -172,7 +133,7 @@ def main():
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,
     )
-        # setup callbacks
+    # setup callbacks
     _model_save_path = (
         f"/content/gdrive/MyDrive/HotWheelsRL/data/models/{_run.name}"
         if IN_COLAB
@@ -198,7 +159,6 @@ def main():
         render=False,
     )
     _callback_list = CallbackList([eval_callback, wandb_callback])
-
 
     model.learn(
         total_timesteps=args.total_steps,

@@ -125,10 +125,7 @@ def main(
         render=False,
     )
     video_callback = VideoRecorderCallback(
-        eval_env=venv, 
-        render_freq=5_000_000, 
-        n_eval_episodes=1, 
-        deterministic=True
+        eval_env=venv, render_freq=5_000_000, n_eval_episodes=1, deterministic=True
     )
     _callback_list = CallbackList([eval_callback, wandb_callback, video_callback])
 
@@ -137,7 +134,7 @@ def main(
         model = PPO.load(
             path=model_path,
             env=venv,
-            # Needed because sometimes sb3 cant find the 
+            # Needed because sometimes sb3 cant find the
             # obs and action space. Seen in colab on 8/21/23
             custom_objects={
                 "observation_space": venv.observation_space,
