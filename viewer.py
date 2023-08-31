@@ -1,6 +1,8 @@
 import gymnasium as gym
 import pygame
 import numpy as np
+import sys
+target_fps = 60
 
 
 class Viewer(gym.Wrapper):
@@ -71,5 +73,5 @@ class Viewer(gym.Wrapper):
         observation, reward, terminated, truncated, info = self.env.step(action)
         em_img = self.env.get_screen()
         self.update_display(observation, em_img)
-        self.fpsClock.tick()
+        self.fpsClock.tick(30.0)
         return observation, reward, terminated, truncated, info
