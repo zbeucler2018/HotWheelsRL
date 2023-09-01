@@ -67,7 +67,7 @@ def wrap_deepmind_retro(env):
 def make_env():
     env = make_retro(
         game="HotWheelsStuntTrackChallenge-gba",
-        state="Dinosaur_Boneyard_multi",
+        state="TRex_Valley_single",
         scenario=None,
     )
     env = wrap_deepmind_retro(env)

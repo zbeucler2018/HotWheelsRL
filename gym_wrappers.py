@@ -213,14 +213,15 @@ class PenalizeHittingWalls(gym.Wrapper):
     hitting a wall
     """
 
-    def __init__(self, env):
+    def __init__(self, env, penality: int = -5):
+        self.hit_wall_penality = penality
         super().__init__(env)
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        # TODO: make this better lol
-        if info["hit_wall"] in [101, 201, 301]:
-            reward -= 5
+        # TODO: make this better to work on all tracks
+        if info["hit_wall"] == 1:
+            reward -= self.hit_wall_penality
         return observation, reward, terminated, truncated, info
 
 

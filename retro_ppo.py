@@ -19,7 +19,7 @@ from stable_baselines3.common.vec_env import (
     VecTransposeImage,
 )
 
-from utils import print_args, in_colab, parse_args
+from utils import in_colab, parse_args, HotWheelsStates
 
 IN_COLAB = in_colab()
 print(f"Running in colab: {IN_COLAB}")
@@ -35,11 +35,22 @@ from wandb.integration.sb3 import WandbCallback
 
 
 def make_retro(
-    *, game, state=None, max_episode_steps=5100, render_mode="rgb_array", **kwargs
+    *,
+    game,
+    state: HotWheelsStates = HotWheelsStates.DEFAULT,
+    max_episode_steps=5100,
+    render_mode="rgb_array",
+    **kwargs,
 ):
-    if state is None:
-        state = retro.State.DEFAULT
-    env = retro.make(game, state, render_mode=render_mode, **kwargs)
+    env = retro.make(
+        game,
+        state=f"{state}.state",
+        info=retro.data.get_file_path(
+            "HotWheelsStuntTrackChallenge-gba", f"{state}.json"
+        ),
+        render_mode=render_mode,
+        **kwargs,
+    )
     env = Monitor(env)
     env = StochasticFrameSkip(env, n=4, stickprob=0.25)
     env = TerminateOnCrash(env)
@@ -47,8 +58,10 @@ def make_retro(
     env = HotWheelsDiscretizer(env)
 
     if max_episode_steps is not None:
-        # 5100 (1700*3) frames to complete 3 laps and be 4th vs NPCs
+        # 5100 (1700*3) frames to complete 3 laps (trex valley) and be 4th vs NPCs
         env = TimeLimit(env, max_episode_steps=max_episode_steps)
+
+    print(f"Using ", f"state: {state}.state", f"info: {state}.json", sep="\n")
     return env
 
 
@@ -82,7 +95,7 @@ def main():
             "total_training_steps": args.total_steps,
             "framestack": True,
         },
-        monitor_gym=True,
+        #monitor_gym=True,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,

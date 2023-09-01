@@ -71,7 +71,7 @@ class Viewer(gym.Wrapper):
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        em_img = self.env.get_screen()
+        em_img = self.env.unwrapped.get_screen()
         self.update_display(observation, em_img)
-        self.fpsClock.tick(30.0)
+        self.fpsClock.tick(25.0)
         return observation, reward, terminated, truncated, info
