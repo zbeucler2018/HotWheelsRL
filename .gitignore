@@ -8,6 +8,9 @@
 *.gba
 *.sfc
 
+# spam
+.DS_Store
+
 # whl
 *.whl
 
