@@ -2,17 +2,28 @@
 Integration notes
 *************************
 
-dino1 -> TRex_Valley_(single|multi)
-dino2 -> Dinosaur_Boneyard_(single|multi)
 
-spider1 -> Black_Widows_Nest(single|multi)
-spider2 -> Insect_Hive_(single|multi)
+# Game Episodes
+- Jurassic Jam
+    - TRex Valley
+    - Dinosaur Boneyard
 
-pirate1 ->
-pirate2 ->
-
-space1 ->
-space2 ->
-
-lava1 ->
-lava2 -> 
+**Everything below has not been integrated**
+- Spider Alley
+    - Black Widows Nest
+    - Insect Hive
+- Buccaneer Bay
+    - Whiteskull Cliffs
+    - Monsters of the Deep
+- Tiki Island
+    - Jungle Snakepit
+    - Gator Forest
+- Zero Gravity Zone
+    - Satellite Mission
+    - Solar Strip
+- Lava Land
+    - Fire Mountain
+    - Volcano Battle
+- Champions League
+    - 12-track (all tracks) championship circuit
+    - race harder NPCs
