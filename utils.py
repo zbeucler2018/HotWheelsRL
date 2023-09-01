@@ -3,6 +3,7 @@ import multiprocessing
 import argparse
 import retro
 import sys
+import enum
 
 
 def get_retro_install_path(verbose: bool = False) -> str:
@@ -70,7 +71,7 @@ def parse_args(parser: argparse.ArgumentParser):
     Parses arguments for CLI scripts
     """
     parser.add_argument("--game", default="HotWheelsStuntTrackChallenge-gba")
-    parser.add_argument("--state", default=retro.State.DEFAULT)
+    parser.add_argument("--state", default=HotWheelsStates.DEFAULT)
     parser.add_argument("--scenario", default=None)
     parser.add_argument(
         "--total_steps", help="Total steps to train", type=int, required=True
@@ -119,3 +120,14 @@ def parse_args(parser: argparse.ArgumentParser):
         sys.exit(2)
 
     return _args
+
+
+class HotWheelsStates(str, enum.Enum):
+    """
+    Enviroments to put the agent into
+    """
+
+    DEFAULT = "TRex_Valley_single"
+    TREX_VALLEY_SINGLE = "TRex_Valley_single"
+    TREX_VALLEY_MULTI = "TRex_Valley_multi"
+    DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"

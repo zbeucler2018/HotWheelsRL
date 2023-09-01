@@ -1,0 +1,18 @@
+*************************
+Integration notes
+*************************
+
+dino1 -> TRex_Valley_(single|multi)
+dino2 -> Dinosaur_Boneyard_(single|multi)
+
+spider1 -> Black_Widows_Nest(single|multi)
+spider2 -> Insect_Hive_(single|multi)
+
+pirate1 ->
+pirate2 ->
+
+space1 ->
+space2 ->
+
+lava1 ->
+lava2 -> 

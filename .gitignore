@@ -11,10 +11,6 @@
 # whl
 *.whl
 
-# testing
-test.ipynb
-test.py
-
 # tensorboard logs
 logs/
 
