@@ -15,7 +15,7 @@ end
 
 
 function isHittingWall()
-	if data.hit_wall > 1 then
+	if data.hit_wall == 1 then
 		return true
 	else
 		return false
