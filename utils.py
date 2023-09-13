@@ -4,6 +4,7 @@ import argparse
 import retro
 import sys
 import enum
+from stable_baselines3.common.policies import obs_as_tensor
 
 
 def get_retro_install_path(verbose: bool = False) -> str:
@@ -131,3 +132,16 @@ class HotWheelsStates(str, enum.Enum):
     TREX_VALLEY_SINGLE = "TRex_Valley_single"
     TREX_VALLEY_MULTI = "TRex_Valley_multi"
     DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"
+
+
+def predict_action_prob(model, obs):
+    """
+    Returns the action probability 
+    of a obs
+    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
+    """
+    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
+    dis = model.policy.get_distribution(_obs)
+    probs = dis.distribution.probs
+    probs_np = probs.detach().numpy()
+    return probs_np
