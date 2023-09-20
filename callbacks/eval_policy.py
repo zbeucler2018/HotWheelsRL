@@ -79,9 +79,13 @@ def evaluate_policy(
         )
 
     n_envs = env.unwrapped.num_envs
-    episode_rewards = []
-    episode_lengths = []
-    episode_progresses = []
+    episode_info = {
+        "episode_rewards": [],
+        "episode_lengths": [],
+        "episode_progresses": [],
+        "episode_scores": [],
+        "episode_laps": []
+    }
 
     episode_counts = np.zeros(n_envs, dtype="int")
     # Divides episodes among different sub environments in the vector as evenly as possible
@@ -124,14 +128,18 @@ def evaluate_policy(
                             # Do not trust "done" with episode endings.
                             # Monitor wrapper includes "episode" key in info if environment
                             # has been wrapped with it. Use those rewards instead.
-                            episode_rewards.append(info["episode"]["r"])
-                            episode_lengths.append(info["episode"]["l"])
+                            episode_info["episode_rewards"].append(info["episode"]["r"])
+                            episode_info["episode_lengths"].append(info["episode"]["l"])
                             # Only increment at the real end of an episode
                             episode_counts[i] += 1
-                        episode_progresses.append(info["progress"])
+                        episode_info["episode_progresses"].append(info["progress"])
+                        episode_info["episode_laps"].append(info["lap"])
+                        episode_info["episode_scores"].append(info["score"])
+                        # if info.get("rank", None) is not None:
+                        #     episode_info["episode_ranks"].append(info["rank"])
                     else:
-                        episode_rewards.append(current_rewards[i])
-                        episode_lengths.append(current_lengths[i])
+                        episode_info["episode_lengths"].append(current_lengths[i])
+                        episode_info["episode_rewards"].append(current_rewards[i])
                         episode_counts[i] += 1
                     current_rewards[i] = 0
                     current_lengths[i] = 0
@@ -141,13 +149,13 @@ def evaluate_policy(
         if render:
             env.render()
 
-    mean_reward = np.mean(episode_rewards)
-    std_reward = np.std(episode_rewards)
+    mean_reward = np.mean(episode_info["episode_rewards"])
+    std_reward = np.std(episode_info["episode_rewards"])
     if reward_threshold is not None:
         assert mean_reward > reward_threshold, (
             "Mean reward below threshold: "
             f"{mean_reward:.2f} < {reward_threshold:.2f}"
         )
     if return_episode_rewards:
-        return episode_rewards, episode_lengths, episode_progresses
+        return episode_info
     return mean_reward, std_reward

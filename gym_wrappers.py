@@ -106,6 +106,7 @@ class TerminateOnCrash(gym.Wrapper):
         mean_obs = observation.mean()
         if mean_obs >= self.crash_restart_obs_threshold:
             terminated = True
+            truncated = True
             reward -= self.crash_penality
 
         return observation, reward, terminated, truncated, info

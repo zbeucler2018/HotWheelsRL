@@ -3,10 +3,11 @@
 -- single lap: (data.progress == 320)
 -- three laps: (data.progress >= 950)
 
-
 function isGameOver()
-	-- if data.progress >= 949 then
-	if data.lap >= 4 then
+	if data.progress < 0 then
+		print("DONE!")
+		data.progress = 950
+	-- if data.lap >= 4 then
 		return true
 	else
 		return false
@@ -24,7 +25,12 @@ end
 
 
 function isDone()
-	return isGameOver() or isHittingWall()
+	prev_score = data.score
+	print(prev_score)
+	if data.score < 0 then
+		data.score = prev_score
+	end
+	return isGameOver() -- or isHittingWall()
 end
 
 

@@ -78,7 +78,7 @@ def make_env():
 venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_env] * 1), n_stack=4))
 
 
-model_path = "best_models/vocal-star-146/best_model.zip"
+model_path = "best_model (3).zip"
 
 
 model = PPO.load(
@@ -94,7 +94,7 @@ model = PPO.load(
 
 
 try:
-    r, ep, p = evaluate_policy(
+    eval_info = evaluate_policy(
         model,
         venv,
         n_eval_episodes=1,
@@ -102,6 +102,9 @@ try:
         deterministic=True,
         render=False,
     )
-    print(f"Mean reward: {r}", f"Mean ep length: {ep}", f"Mean progress: {p}", sep="\n")
+
+    for key,value in eval_info.items():
+        print(f"{key}:  {np.mean(value)}")
+
 finally:
     venv.close()
