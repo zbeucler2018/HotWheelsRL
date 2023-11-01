@@ -152,7 +152,7 @@ def main():
         log_path=f"./logs/{_run.name}",
         eval_freq=max(100_000 // args.num_envs, 1),
         deterministic=True,
-        render=True,
+        render=False,
     )
     _callback_list = CallbackList([eval_callback, wandb_callback])
 
