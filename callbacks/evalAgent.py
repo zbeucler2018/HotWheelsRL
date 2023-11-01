@@ -188,7 +188,7 @@ class EvalCallback(EventCallback):
             )
             mean_progress = np.mean(episode_info['episode_progresses'])
             mean_laps = np.mean(episode_info['episode_laps'])
-            mean_scores = np.mean(episode_info['mean_scores'])
+            mean_scores = np.mean(episode_info['episode_scores'])
 
             self.last_mean_reward = mean_reward
 
