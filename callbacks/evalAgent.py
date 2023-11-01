@@ -152,7 +152,7 @@ class EvalCallback(EventCallback):
             # Reset success rate buffer
             self._is_success_buffer = []
 
-            episode_rewards, episode_lengths, episode_progresses = evaluate_policy(
+            episode_info = evaluate_policy(
                 self.model,
                 self.eval_env,
                 n_eval_episodes=self.n_eval_episodes,
@@ -165,8 +165,8 @@ class EvalCallback(EventCallback):
 
             if self.log_path is not None:
                 self.evaluations_timesteps.append(self.num_timesteps)
-                self.evaluations_results.append(episode_rewards)
-                self.evaluations_length.append(episode_lengths)
+                self.evaluations_results.append(episode_info['episode_rewards'])
+                self.evaluations_length.append(episode_info['episode_lengths'])
 
                 kwargs = {}
                 # Save success log if present
@@ -182,11 +182,14 @@ class EvalCallback(EventCallback):
                     **kwargs,
                 )
 
-            mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
-            mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(
-                episode_lengths
+            mean_reward, std_reward = np.mean(episode_info['episode_rewards']), np.std(episode_info['episode_rewards'])
+            mean_ep_length, std_ep_length = np.mean(episode_info['episode_lengths']), np.std(
+                episode_info['episode_lengths']
             )
-            mean_progress = np.mean(episode_progresses)
+            mean_progress = np.mean(episode_info['episode_progresses'])
+            mean_laps = np.mean(episode_info['episode_laps'])
+            mean_scores = np.mean(episode_info['mean_scores'])
+
             self.last_mean_reward = mean_reward
 
             if self.verbose >= 1:
@@ -196,10 +199,13 @@ class EvalCallback(EventCallback):
                 )
                 print(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
                 print(f"Episode progress: {mean_progress}")
+                print(f"Episode score: {mean_scores}")
+                print(f"Episode laps: {mean_laps}")
             # Add to current Logger
             self.logger.record("eval/mean_reward", float(mean_reward))
             self.logger.record("eval/mean_ep_length", mean_ep_length)
             self.logger.record("eval/mean_progress", mean_progress)
+            self.logger.record("eval/mean_laps", mean_laps)
 
             if len(self._is_success_buffer) > 0:
                 success_rate = np.mean(self._is_success_buffer)

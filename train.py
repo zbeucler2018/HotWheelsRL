@@ -146,11 +146,13 @@ def main():
         if IN_COLAB
         else f"./best_models/{_run.name}"
     )
+    ef = max(100_000 // args.num_envs, 1) # max(args.num_steps // args.num_envs, 1)
+    print(f"Eval freq: {ef}")
     eval_callback = EvalCallback(
         venv,
         best_model_save_path=_best_model_save_path,
         log_path=f"./logs/{_run.name}",
-        eval_freq=max(100_000 // args.num_envs, 1),
+        eval_freq=ef,
         deterministic=True,
         render=False,
     )
