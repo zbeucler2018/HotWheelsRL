@@ -29,7 +29,7 @@ function isDone()
 	if data.score < 0 then
 		data.score = prev_score
 	end
-	return isGameOver() -- or isHittingWall()
+	return isGameOver() or isHittingWall()
 end
 
 
