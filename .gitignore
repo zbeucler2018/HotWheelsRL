@@ -1,5 +1,7 @@
 # models
 *.zip
+old_models/*
+old_models
 
 # videos
 *.mp4

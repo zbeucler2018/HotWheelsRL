@@ -99,6 +99,7 @@ def main():
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,
+        tags=[args.state]
     )
 
     if args.resume:
@@ -151,7 +152,7 @@ def main():
         log_path=f"./logs/{_run.name}",
         eval_freq=max(100_000 // args.num_envs, 1),
         deterministic=True,
-        render=False,
+        render=True,
     )
     _callback_list = CallbackList([eval_callback, wandb_callback])
 

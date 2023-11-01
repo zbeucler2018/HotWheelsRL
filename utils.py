@@ -6,6 +6,16 @@ import sys
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
 
+class HotWheelsStates(str, enum.Enum):
+    """
+    Enviroments to put the agent into
+    """
+
+    DEFAULT = "TRex_Valley_single"
+    TREX_VALLEY_SINGLE = "TRex_Valley_single"
+    TREX_VALLEY_MULTI = "TRex_Valley_multi"
+    DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"
+
 
 def get_retro_install_path(verbose: bool = False) -> str:
     """
@@ -67,7 +77,24 @@ def print_args(func: callable):
     return _wrapper
 
 
-def parse_args(parser: argparse.ArgumentParser):
+from dataclasses import dataclass
+
+@dataclass
+class CLI_Args:
+    game: str
+    state: HotWheelsStates
+    scenario: str
+    total_steps: int
+    num_envs: int
+    resume: bool
+    run_id: str
+    model_path: str
+    trim_obs: bool
+    minimap_obs: bool
+
+
+
+def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
     """
     Parses arguments for CLI scripts
     """
@@ -122,16 +149,6 @@ def parse_args(parser: argparse.ArgumentParser):
 
     return _args
 
-
-class HotWheelsStates(str, enum.Enum):
-    """
-    Enviroments to put the agent into
-    """
-
-    DEFAULT = "TRex_Valley_single"
-    TREX_VALLEY_SINGLE = "TRex_Valley_single"
-    TREX_VALLEY_MULTI = "TRex_Valley_multi"
-    DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"
 
 
 def predict_action_prob(model, obs):

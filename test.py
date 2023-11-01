@@ -33,7 +33,7 @@ def make_retro(
     game,
     state: HotWheelsStates = HotWheelsStates.DEFAULT,
     max_episode_steps=4500,
-    render_mode="rgb_array",
+    render_mode="human",
     **kwargs,
 ):
     print(f"Using ", f"state: {state}.state", f"info: {state}.json", sep="\n")
@@ -67,7 +67,7 @@ def wrap_deepmind_retro(env):
 def make_env():
     env = make_retro(
         game="HotWheelsStuntTrackChallenge-gba",
-        state="TRex_Valley_single",
+        state=HotWheelsStates.DINO_BONEYARD_MULTI,
         scenario=None,
     )
     env = wrap_deepmind_retro(env)
@@ -78,7 +78,7 @@ def make_env():
 venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_env] * 1), n_stack=4))
 
 
-model_path = "best_model (3).zip"
+model_path = "model.zip"
 
 
 model = PPO.load(

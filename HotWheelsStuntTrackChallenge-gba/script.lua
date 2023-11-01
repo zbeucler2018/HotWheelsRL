@@ -26,7 +26,6 @@ end
 
 function isDone()
 	prev_score = data.score
-	print(prev_score)
 	if data.score < 0 then
 		data.score = prev_score
 	end
