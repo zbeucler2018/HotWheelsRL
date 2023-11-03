@@ -5,6 +5,7 @@ old_models
 
 # videos
 *.mp4
+*.bk2
 
 # rom file
 *.gba
