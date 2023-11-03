@@ -5,7 +5,6 @@ Taken from: https://github.com/Farama-Foundation/stable-retro/blob/master/retro/
 """
 
 import argparse
-
 import gymnasium as gym
 import numpy as np
 from gymnasium.wrappers.time_limit import TimeLimit
@@ -18,20 +17,15 @@ from stable_baselines3.common.vec_env import (
     VecFrameStack,
     VecTransposeImage,
 )
-
-from utils import in_colab, parse_args, HotWheelsStates
+import retro
+from gym_wrappers import *
+from callbacks.evalAgent import EvalCallback
+import wandb
+from wandb.integration.sb3 import WandbCallback
+from utils import in_colab, parse_args, print_args, HotWheelsStates
 
 IN_COLAB = in_colab()
 print(f"Running in colab: {IN_COLAB}")
-
-import retro
-
-from gym_wrappers import *
-
-from callbacks.evalAgent import EvalCallback
-
-import wandb
-from wandb.integration.sb3 import WandbCallback
 
 
 def make_retro(
@@ -74,10 +68,8 @@ def wrap_deepmind_retro(env):
     return env
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    args = parse_args(parser)
-
+@print_args
+def main(args) -> None:
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
         env = wrap_deepmind_retro(env)
@@ -95,11 +87,10 @@ def main():
             "total_training_steps": args.total_steps,
             "framestack": True,
         },
-        #monitor_gym=True,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,
-        tags=[args.state]
+        tags=[args.state],
     )
 
     if args.resume:
@@ -146,7 +137,7 @@ def main():
         if IN_COLAB
         else f"./best_models/{_run.name}"
     )
-    ef = max(100_000 // args.num_envs, 1) # max(args.num_steps // args.num_envs, 1)
+    ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
     print(f"Eval freq: {ef}")
     eval_callback = EvalCallback(
         venv,
@@ -171,4 +162,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    args = parse_args(parser)
+    main(args)

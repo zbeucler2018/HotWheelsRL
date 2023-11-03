@@ -6,6 +6,7 @@ import sys
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
 
+
 class HotWheelsStates(str, enum.Enum):
     """
     Enviroments to put the agent into
@@ -68,16 +69,18 @@ def print_args(func: callable):
     of the function it decorates
     """
 
-    def _wrapper(**kwargs):
+    def _wrapper(args):
         print("------------")
-        print(kwargs)
+        for k, v in args.items():
+            print(k, v)
         print("------------")
-        return func(**kwargs)
+        return func(args)
 
     return _wrapper
 
 
 from dataclasses import dataclass
+
 
 @dataclass
 class CLI_Args:
@@ -91,7 +94,6 @@ class CLI_Args:
     model_path: str
     trim_obs: bool
     minimap_obs: bool
-
 
 
 def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
@@ -150,10 +152,9 @@ def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
     return _args
 
 
-
 def predict_action_prob(model, obs):
     """
-    Returns the action probability 
+    Returns the action probability
     of a obs
     https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
     """
