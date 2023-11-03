@@ -240,9 +240,7 @@ class RetroInteractive(Interactive):
         env = retro.make(
             game=game,
             state=f"{state}.state",
-            info=retro.data.get_file_path(
-                game, f"{state}.json"
-            ),
+            info=retro.data.get_file_path(game, f"{state}.json"),
             scenario=scenario,
             record=record,
             render_mode="rgb_array",

@@ -165,8 +165,8 @@ class EvalCallback(EventCallback):
 
             if self.log_path is not None:
                 self.evaluations_timesteps.append(self.num_timesteps)
-                self.evaluations_results.append(episode_info['episode_rewards'])
-                self.evaluations_length.append(episode_info['episode_lengths'])
+                self.evaluations_results.append(episode_info["episode_rewards"])
+                self.evaluations_length.append(episode_info["episode_lengths"])
 
                 kwargs = {}
                 # Save success log if present
@@ -182,13 +182,15 @@ class EvalCallback(EventCallback):
                     **kwargs,
                 )
 
-            mean_reward, std_reward = np.mean(episode_info['episode_rewards']), np.std(episode_info['episode_rewards'])
-            mean_ep_length, std_ep_length = np.mean(episode_info['episode_lengths']), np.std(
-                episode_info['episode_lengths']
+            mean_reward, std_reward = np.mean(episode_info["episode_rewards"]), np.std(
+                episode_info["episode_rewards"]
             )
-            mean_progress = np.mean(episode_info['episode_progresses'])
-            mean_laps = np.mean(episode_info['episode_laps'])
-            mean_scores = np.mean(episode_info['episode_scores'])
+            mean_ep_length, std_ep_length = np.mean(
+                episode_info["episode_lengths"]
+            ), np.std(episode_info["episode_lengths"])
+            mean_progress = np.mean(episode_info["episode_progresses"])
+            mean_laps = np.mean(episode_info["episode_laps"])
+            mean_scores = np.mean(episode_info["episode_scores"])
 
             self.last_mean_reward = mean_reward
 

@@ -2,6 +2,7 @@ import gymnasium as gym
 import pygame
 import numpy as np
 import sys
+
 target_fps = 60
 
 

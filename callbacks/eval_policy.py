@@ -84,7 +84,7 @@ def evaluate_policy(
         "episode_lengths": [],
         "episode_progresses": [],
         "episode_scores": [],
-        "episode_laps": []
+        "episode_laps": [],
     }
 
     episode_counts = np.zeros(n_envs, dtype="int")
