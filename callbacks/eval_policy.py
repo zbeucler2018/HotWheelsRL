@@ -13,6 +13,37 @@ from stable_baselines3.common.vec_env import (
 )
 
 
+
+def use_test_eval(func):
+    """
+    Evaluate the policy on a specific state
+    
+    TODO: Modify so it works for VecEnvs
+    """
+    def _wrapper(*args, **kwargs):
+        _env = kwargs['env'] # creates a pointer right? I need the env in kwargs to be modified
+        _eval_statename = kwargs['eval_statename']
+        _train_state = _env.unwrapped.statename
+        
+        # set the eval state
+        _env.unwrapped.load_state(_eval_statename)
+        _env.unwrapped.data.reset()
+        _env.unwrapped.data.update_ram()
+
+        # evaluate the policy
+        result = func(*args, **kwargs)
+
+        # set the training state
+        _env.unwrapped.load_state(_train_state)
+        _env.unwrapped.data.reset()
+        _env.unwrapped.data.update_ram()
+
+        # _, _ = _env.reset(seed=42) ???
+        return result
+    return _wrapper
+
+
+
 def evaluate_policy(
     model: "type_aliases.PolicyPredictor",
     env: Union[gym.Env, VecEnv],

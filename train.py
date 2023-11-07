@@ -5,71 +5,28 @@ Taken from: https://github.com/Farama-Foundation/stable-retro/blob/master/retro/
 """
 
 import argparse
-import gymnasium as gym
-import numpy as np
-from gymnasium.wrappers.time_limit import TimeLimit
-from stable_baselines3.common.monitor import Monitor
+from train_utils import make_retro, wrap_deepmind_retro
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CallbackList
-from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
 from stable_baselines3.common.vec_env import (
     SubprocVecEnv,
     VecFrameStack,
     VecTransposeImage,
 )
-import retro
 from gym_wrappers import *
 from callbacks.evalAgent import EvalCallback
 import wandb
 from wandb.integration.sb3 import WandbCallback
-from utils import in_colab, parse_args, print_args, HotWheelsStates
-
-IN_COLAB = in_colab()
-print(f"Running in colab: {IN_COLAB}")
-
-
-def make_retro(
-    *,
-    game,
-    state: HotWheelsStates = HotWheelsStates.DEFAULT,
-    max_episode_steps=5100,
-    render_mode="rgb_array",
-    **kwargs,
-):
-    env = retro.make(
-        game,
-        state=f"{state}.state",
-        info=retro.data.get_file_path(
-            "HotWheelsStuntTrackChallenge-gba", f"{state}.json"
-        ),
-        render_mode=render_mode,
-        **kwargs,
-    )
-    env = Monitor(env)
-    env = StochasticFrameSkip(env, n=4, stickprob=0.25)
-    env = TerminateOnCrash(env)
-    env = PenalizeHittingWalls(env)
-    env = HotWheelsDiscretizer(env)
-
-    if max_episode_steps is not None:
-        # 5100 (1700*3) frames to complete 3 laps (trex valley) and be 4th vs NPCs
-        env = TimeLimit(env, max_episode_steps=max_episode_steps)
-
-    print(f"Using ", f"state: {state}.state", f"info: {state}.json", sep="\n")
-    return env
-
-
-def wrap_deepmind_retro(env):
-    """
-    Configure environment for retro games, using config similar to DeepMind-style Atari in openai/baseline's wrap_deepmind
-    """
-    env = WarpFrame(env)
-    env = ClipRewardEnv(env)
-    return env
+from utils import in_colab, parse_args, print_args
 
 
 @print_args
 def main(args) -> None:
+    ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
+    print(f"Eval freq: {ef}")
+    IN_COLAB = in_colab()
+    print(f"Running in colab: {IN_COLAB}")
+
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
         env = wrap_deepmind_retro(env)
@@ -137,8 +94,7 @@ def main(args) -> None:
         if IN_COLAB
         else f"./best_models/{_run.name}"
     )
-    ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
-    print(f"Eval freq: {ef}")
+
     eval_callback = EvalCallback(
         venv,
         best_model_save_path=_best_model_save_path,
