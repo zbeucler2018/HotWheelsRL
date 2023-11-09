@@ -20,7 +20,7 @@ from wandb.integration.sb3 import WandbCallback
 from utils import in_colab, parse_args, print_args
 
 
-@print_args
+#@print_args
 def main(args) -> None:
     ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
     print(f"Eval freq: {ef}")
@@ -30,6 +30,7 @@ def main(args) -> None:
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
         env = wrap_deepmind_retro(env)
+        env = HotWheelsWrapper(env) # allows us to change to eval state
         return env
 
     venv = VecTransposeImage(
@@ -101,7 +102,7 @@ def main(args) -> None:
         log_path=f"./logs/{_run.name}",
         eval_freq=ef,
         deterministic=True,
-        render=False,
+        render=True,
     )
     _callback_list = CallbackList([eval_callback, wandb_callback])
 
@@ -118,6 +119,28 @@ def main(args) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    args = parse_args(parser)
+    #parser = argparse.ArgumentParser()
+    #args = parse_args(parser)
+
+    from dataclasses import dataclass
+    from utils import HotWheelsStates
+
+    ### MOSTLY FOR DEBUGGING
+
+    @dataclass
+    class A:
+        total_steps: int
+        num_envs: int
+        game: str = "HotWheelsStuntTrackChallenge-gba"
+        state: HotWheelsStates = HotWheelsStates.TREX_VALLEY_SINGLE
+        scenario: any = None
+        resume: bool = False
+        run_id: any = None
+
+
+    args = A(
+        total_steps=5000,
+        num_envs=4
+    )
+
     main(args)

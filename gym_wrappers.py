@@ -271,3 +271,23 @@ class StochasticFrameSkip(gym.Wrapper):
             if terminated or truncated:
                 break
         return ob, totrew, terminated, truncated, info
+
+
+class HotWheelsWrapper(gym.Wrapper):
+    """
+    Allows access to RetroEnv.data
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def reset_emulator_data(self):
+        """
+        Resets the emulator by reseting the variables
+        and updating the RAM
+        """
+        retro_data = self.get_wrapper_attr(name="data")
+        retro_data.reset()
+        retro_data.update_ram()
+
+

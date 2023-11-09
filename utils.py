@@ -5,7 +5,7 @@ import retro
 import sys
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
-
+import gymnasium as gym
 
 class HotWheelsStates(str, enum.Enum):
     """
@@ -18,7 +18,7 @@ class HotWheelsStates(str, enum.Enum):
     DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"
 
 
-def get_retro_install_path(verbose: bool = False) -> str:
+def get_retro_install_path() -> str:
     """
     returns the install filepath of [gym,stable]-retro
     """

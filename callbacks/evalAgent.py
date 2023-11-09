@@ -3,7 +3,7 @@ from typing import Any, Dict
 import gymnasium as gym
 
 from stable_baselines3.common.callbacks import BaseCallback
-
+from utils import HotWheelsStates
 
 import os
 import warnings
@@ -21,7 +21,7 @@ from stable_baselines3.common.vec_env import (
 )
 from stable_baselines3.common.callbacks import EventCallback
 
-from .eval_policy import evaluate_policy
+from .eval_policy import evaluate_policy, evaluate_policy_on_state
 
 
 class EvalCallback(EventCallback):
@@ -152,15 +152,16 @@ class EvalCallback(EventCallback):
             # Reset success rate buffer
             self._is_success_buffer = []
 
-            episode_info = evaluate_policy(
-                self.model,
-                self.eval_env,
+            episode_info = evaluate_policy_on_state(
+                model=self.model,
+                env=self.eval_env,
                 n_eval_episodes=self.n_eval_episodes,
                 render=self.render,
                 deterministic=self.deterministic,
                 return_episode_rewards=True,
                 warn=self.warn,
                 callback=self._log_success_callback,
+                eval_statename="232.state"
             )
 
             if self.log_path is not None:

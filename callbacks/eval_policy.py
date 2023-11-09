@@ -1,9 +1,8 @@
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
 import gymnasium as gym
 import numpy as np
-
+import retro
 from stable_baselines3.common import type_aliases
 from stable_baselines3.common.vec_env import (
     DummyVecEnv,
@@ -11,37 +10,43 @@ from stable_baselines3.common.vec_env import (
     VecMonitor,
     is_vecenv_wrapped,
 )
+from utils import HotWheelsStates
 
 
 
-def use_test_eval(func):
+
+def evaluate_policy_on_state(**kwargs):
     """
-    Evaluate the policy on a specific state
-    
-    TODO: Modify so it works for VecEnvs
+    Runs sb3's evaluate_policy on eval_statename instead of the training state
     """
-    def _wrapper(*args, **kwargs):
-        _env = kwargs['env'] # creates a pointer right? I need the env in kwargs to be modified
-        _eval_statename = kwargs['eval_statename']
-        _train_state = _env.unwrapped.statename
-        
-        # set the eval state
-        _env.unwrapped.load_state(_eval_statename)
-        _env.unwrapped.data.reset()
-        _env.unwrapped.data.update_ram()
+    env = kwargs["env"]
+    eval_statename = kwargs["eval_statename"]
+    kwargs.pop("eval_statename")
 
-        # evaluate the policy
-        result = func(*args, **kwargs)
+    # Ensure the environment is wrapped as a VecEnv
+    if not isinstance(env, VecEnv):
+        raise Exception(f"evaluate_policy_on_state() requires a SubProcVecEnv")
 
-        # set the training state
-        _env.unwrapped.load_state(_train_state)
-        _env.unwrapped.data.reset()
-        _env.unwrapped.data.update_ram()
+    # collect the training states
+    training_states = env.unwrapped.get_attr("statename")
 
-        # _, _ = _env.reset(seed=42) ???
-        return result
-    return _wrapper
+    # load the state
+    _ = env.env_method(method_name="load_state", statename=eval_statename)
 
+    # reset RAM and variables
+    _ = env.env_method(method_name="reset_emulator_data")
+
+    # evaluate the policy
+    result = evaluate_policy(**kwargs)
+
+    # set back the original training states
+    for indx,t_state in enumerate(training_states):
+        _ = env.env_method(method_name="load_state", indices=indx,  statename=t_state)
+
+    # reset RAM and variables
+    _ = env.env_method(method_name="reset_emulator_data")
+
+    return result
 
 
 def evaluate_policy(
@@ -178,7 +183,7 @@ def evaluate_policy(
         observations = new_observations
 
         if render:
-            env.render()
+            env.render("human")
 
     mean_reward = np.mean(episode_info["episode_rewards"])
     std_reward = np.std(episode_info["episode_rewards"])
