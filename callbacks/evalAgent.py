@@ -46,6 +46,7 @@ class EvalCallback(EventCallback):
         according to performance on the eval env will be saved.
     :param deterministic: Whether the evaluation should
         use a stochastic or deterministic actions.
+    :paaram eval_statename: State to evaluate on
     :param render: Whether to render or not the environment during evaluation
     :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
     :param warn: Passed to ``evaluate_policy`` (warns if ``eval_env`` has not been
@@ -58,10 +59,11 @@ class EvalCallback(EventCallback):
         callback_on_new_best: Optional[BaseCallback] = None,
         callback_after_eval: Optional[BaseCallback] = None,
         n_eval_episodes: int = 5,
-        eval_freq: int = 10000,
+        eval_freq: int = 10_000,
         log_path: Optional[str] = None,
         best_model_save_path: Optional[str] = None,
         deterministic: bool = True,
+        eval_statename: HotWheelsStates = None,
         render: bool = False,
         verbose: int = 1,
         warn: bool = True,
@@ -77,6 +79,7 @@ class EvalCallback(EventCallback):
         self.eval_freq = eval_freq
         self.best_mean_reward = -np.inf
         self.last_mean_reward = -np.inf
+        self.eval_statename = eval_statename
         self.deterministic = deterministic
         self.render = render
         self.warn = warn
@@ -152,17 +155,33 @@ class EvalCallback(EventCallback):
             # Reset success rate buffer
             self._is_success_buffer = []
 
-            episode_info = evaluate_policy_on_state(
-                model=self.model,
-                env=self.eval_env,
-                n_eval_episodes=self.n_eval_episodes,
-                render=self.render,
-                deterministic=self.deterministic,
-                return_episode_rewards=True,
-                warn=self.warn,
-                callback=self._log_success_callback,
-                eval_statename="232.state"
-            )
+            # evaluate on eval_statename if specified
+            if self.eval_statename:
+                if not ".state" in self.eval_statename:
+                    self.eval_statename = f"{self.eval_statename}.state"
+                episode_info = evaluate_policy_on_state(
+                    model=self.model,
+                    env=self.eval_env,
+                    n_eval_episodes=self.n_eval_episodes,
+                    render=self.render,
+                    deterministic=self.deterministic,
+                    return_episode_rewards=True,
+                    warn=self.warn,
+                    callback=self._log_success_callback,
+                    eval_statename=self.eval_statename
+                )
+            else:
+                # eval on training state if not specified
+                episode_info = evaluate_policy(
+                    model=self.model,
+                    env=self.eval_env,
+                    n_eval_episodes=self.n_eval_episodes,
+                    render=self.render,
+                    deterministic=self.deterministic,
+                    return_episode_rewards=True,
+                    warn=self.warn,
+                    callback=self._log_success_callback
+                )
 
             if self.log_path is not None:
                 self.evaluations_timesteps.append(self.num_timesteps)
