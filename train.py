@@ -22,7 +22,7 @@ from utils import in_colab, parse_args, print_args
 
 # @print_args
 def main(args) -> None:
-    ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
+    ef = max(100_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
     print(f"Eval freq: {ef}")
     IN_COLAB = in_colab()
     print(f"Running in colab: {IN_COLAB}")

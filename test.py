@@ -143,7 +143,7 @@ from utils import HotWheelsStates
 # while True:
 #     n_step += 1
 #     print(n_step, "232", info)
-    
+
 #     if n_step >= 1000:
 #         break
 
@@ -184,14 +184,60 @@ from utils import HotWheelsStates
 #         time.sleep(5)
 
 
-
-
-
-
 """
 
 
 
 """
+import train_utils
+
+import retro
 
 
+args = {
+    "game": "HotWheelsStuntTrackChallenge-gba",
+    "state": "TRex_Valley_single",
+    "scenario": None,
+    "num_envs": 3,
+    "train_states": ["TRex_Valley_single", "87", "61"],
+}
+
+
+def make_env():
+    env = train_utils.make_retro(
+        game=args["game"],
+        state=args["state"],
+        scenario=args["scenario"],
+        render_mode="rgb_array",
+    )
+    env = train_utils.wrap_deepmind_retro(env)
+    env = HotWheelsWrapper(env)  # allows us to change to eval state
+    return env
+
+
+def main():
+    venv = VecTransposeImage(
+        VecFrameStack(SubprocVecEnv([make_env] * args["num_envs"]), n_stack=4)
+    )
+
+    # Need to change state AFTER adding SubProcVec because
+    # retro will throw "1 Emulator process only: exception
+    # if applied before
+    for indx, t_state in enumerate(args["train_states"]):
+        _ = venv.env_method(
+            method_name="load_state", statename=f"{t_state}.state", indices=indx
+        )
+        _ = venv.env_method(method_name="reset_emulator_data", indices=indx)
+    observations = venv.reset()
+
+    # [[HotWheelsState] ->
+
+
+# def change_state(venv, statenames: [str]|[HotWheelsStates], indicies = None):
+#     for indx,t_state in enumerate(statenames):
+#         _ = venv.env_method(method_name="load_state", statename=f"{t_state}.state", indices=indx)
+#         _ = venv.env_method(method_name="reset_emulator_data", indices=indx)
+
+
+if __name__ == "__main__":
+    main()
