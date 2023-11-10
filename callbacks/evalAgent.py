@@ -168,7 +168,7 @@ class EvalCallback(EventCallback):
                     return_episode_rewards=True,
                     warn=self.warn,
                     callback=self._log_success_callback,
-                    eval_statename=self.eval_statename
+                    eval_statename=self.eval_statename,
                 )
             else:
                 # eval on training state if not specified
@@ -180,7 +180,7 @@ class EvalCallback(EventCallback):
                     deterministic=self.deterministic,
                     return_episode_rewards=True,
                     warn=self.warn,
-                    callback=self._log_success_callback
+                    callback=self._log_success_callback,
                 )
 
             if self.log_path is not None:

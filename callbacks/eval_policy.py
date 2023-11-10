@@ -13,8 +13,6 @@ from stable_baselines3.common.vec_env import (
 from utils import HotWheelsStates
 
 
-
-
 def evaluate_policy_on_state(**kwargs):
     """
     Runs sb3's evaluate_policy on eval_statename instead of the training state
@@ -40,8 +38,8 @@ def evaluate_policy_on_state(**kwargs):
     result = evaluate_policy(**kwargs)
 
     # set back the original training states
-    for indx,t_state in enumerate(training_states):
-        _ = env.env_method(method_name="load_state", indices=indx,  statename=t_state)
+    for indx, t_state in enumerate(training_states):
+        _ = env.env_method(method_name="load_state", indices=indx, statename=t_state)
 
     # reset RAM and variables
     _ = env.env_method(method_name="reset_emulator_data")
