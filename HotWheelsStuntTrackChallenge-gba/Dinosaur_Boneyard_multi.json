@@ -1,0 +1,36 @@
+{
+  "info": {
+    "boost": {
+      "address": 33583272,
+      "type": "<=i4"
+    },
+    "hit_wall": {
+      "address": 33583344,
+      "type": "|i1"
+    },
+    "lap": {
+      "address": 33583346,
+      "type": "|u1"
+    },
+    "npc_score": {
+      "address": 33586198,
+      "type": ">=u4"
+    },
+    "progress": {
+      "address": 33583360,
+      "type": "=i2"
+    },
+    "rank": {
+      "address": 33583345,
+      "type": "><n1"
+    },
+    "score": {
+      "address": 33583624,
+      "type": "<=i4"
+    },
+    "speed": {
+      "address": 33583265,
+      "type": "<u2"
+    }
+  }
+}

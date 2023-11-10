@@ -1,9 +1,8 @@
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
 import gymnasium as gym
 import numpy as np
-
+import retro
 from stable_baselines3.common import type_aliases
 from stable_baselines3.common.vec_env import (
     DummyVecEnv,
@@ -11,6 +10,41 @@ from stable_baselines3.common.vec_env import (
     VecMonitor,
     is_vecenv_wrapped,
 )
+from utils import HotWheelsStates
+
+
+def evaluate_policy_on_state(**kwargs):
+    """
+    Runs sb3's evaluate_policy on eval_statename instead of the training state
+    """
+    env = kwargs["env"]
+    eval_statename = kwargs["eval_statename"]
+    kwargs.pop("eval_statename")
+
+    # Ensure the environment is wrapped as a VecEnv
+    if not isinstance(env, VecEnv):
+        raise Exception(f"evaluate_policy_on_state() requires a SubProcVecEnv")
+
+    # collect the training states
+    training_states = env.unwrapped.get_attr("statename")
+
+    # load the state
+    _ = env.env_method(method_name="load_state", statename=eval_statename)
+
+    # reset RAM and variables
+    _ = env.env_method(method_name="reset_emulator_data")
+
+    # evaluate the policy
+    result = evaluate_policy(**kwargs)
+
+    # set back the original training states
+    for indx, t_state in enumerate(training_states):
+        _ = env.env_method(method_name="load_state", indices=indx, statename=t_state)
+
+    # reset RAM and variables
+    _ = env.env_method(method_name="reset_emulator_data")
+
+    return result
 
 
 def evaluate_policy(
@@ -79,9 +113,13 @@ def evaluate_policy(
         )
 
     n_envs = env.unwrapped.num_envs
-    episode_rewards = []
-    episode_lengths = []
-    episode_progresses = []
+    episode_info = {
+        "episode_rewards": [],
+        "episode_lengths": [],
+        "episode_progresses": [],
+        "episode_scores": [],
+        "episode_laps": [],
+    }
 
     episode_counts = np.zeros(n_envs, dtype="int")
     # Divides episodes among different sub environments in the vector as evenly as possible
@@ -124,14 +162,18 @@ def evaluate_policy(
                             # Do not trust "done" with episode endings.
                             # Monitor wrapper includes "episode" key in info if environment
                             # has been wrapped with it. Use those rewards instead.
-                            episode_rewards.append(info["episode"]["r"])
-                            episode_lengths.append(info["episode"]["l"])
+                            episode_info["episode_rewards"].append(info["episode"]["r"])
+                            episode_info["episode_lengths"].append(info["episode"]["l"])
                             # Only increment at the real end of an episode
                             episode_counts[i] += 1
-                        episode_progresses.append(info["progress"])
+                        episode_info["episode_progresses"].append(info["progress"])
+                        episode_info["episode_laps"].append(info["lap"])
+                        episode_info["episode_scores"].append(info["score"])
+                        # if info.get("rank", None) is not None:
+                        #     episode_info["episode_ranks"].append(info["rank"])
                     else:
-                        episode_rewards.append(current_rewards[i])
-                        episode_lengths.append(current_lengths[i])
+                        episode_info["episode_lengths"].append(current_lengths[i])
+                        episode_info["episode_rewards"].append(current_rewards[i])
                         episode_counts[i] += 1
                     current_rewards[i] = 0
                     current_lengths[i] = 0
@@ -139,15 +181,15 @@ def evaluate_policy(
         observations = new_observations
 
         if render:
-            env.render()
+            env.render("human")
 
-    mean_reward = np.mean(episode_rewards)
-    std_reward = np.std(episode_rewards)
+    mean_reward = np.mean(episode_info["episode_rewards"])
+    std_reward = np.std(episode_info["episode_rewards"])
     if reward_threshold is not None:
         assert mean_reward > reward_threshold, (
             "Mean reward below threshold: "
             f"{mean_reward:.2f} < {reward_threshold:.2f}"
         )
     if return_episode_rewards:
-        return episode_rewards, episode_lengths, episode_progresses
+        return episode_info
     return mean_reward, std_reward

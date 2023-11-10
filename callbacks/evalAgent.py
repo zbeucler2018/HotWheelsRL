@@ -3,7 +3,7 @@ from typing import Any, Dict
 import gymnasium as gym
 
 from stable_baselines3.common.callbacks import BaseCallback
-
+from utils import HotWheelsStates
 
 import os
 import warnings
@@ -21,7 +21,7 @@ from stable_baselines3.common.vec_env import (
 )
 from stable_baselines3.common.callbacks import EventCallback
 
-from .eval_policy import evaluate_policy
+from .eval_policy import evaluate_policy, evaluate_policy_on_state
 
 
 class EvalCallback(EventCallback):
@@ -46,6 +46,7 @@ class EvalCallback(EventCallback):
         according to performance on the eval env will be saved.
     :param deterministic: Whether the evaluation should
         use a stochastic or deterministic actions.
+    :paaram eval_statename: State to evaluate on
     :param render: Whether to render or not the environment during evaluation
     :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
     :param warn: Passed to ``evaluate_policy`` (warns if ``eval_env`` has not been
@@ -58,10 +59,11 @@ class EvalCallback(EventCallback):
         callback_on_new_best: Optional[BaseCallback] = None,
         callback_after_eval: Optional[BaseCallback] = None,
         n_eval_episodes: int = 5,
-        eval_freq: int = 10000,
+        eval_freq: int = 10_000,
         log_path: Optional[str] = None,
         best_model_save_path: Optional[str] = None,
         deterministic: bool = True,
+        eval_statename: HotWheelsStates = None,
         render: bool = False,
         verbose: int = 1,
         warn: bool = True,
@@ -77,6 +79,7 @@ class EvalCallback(EventCallback):
         self.eval_freq = eval_freq
         self.best_mean_reward = -np.inf
         self.last_mean_reward = -np.inf
+        self.eval_statename = eval_statename
         self.deterministic = deterministic
         self.render = render
         self.warn = warn
@@ -152,21 +155,38 @@ class EvalCallback(EventCallback):
             # Reset success rate buffer
             self._is_success_buffer = []
 
-            episode_rewards, episode_lengths, episode_progresses = evaluate_policy(
-                self.model,
-                self.eval_env,
-                n_eval_episodes=self.n_eval_episodes,
-                render=self.render,
-                deterministic=self.deterministic,
-                return_episode_rewards=True,
-                warn=self.warn,
-                callback=self._log_success_callback,
-            )
+            # evaluate on eval_statename if specified
+            if self.eval_statename:
+                if not ".state" in self.eval_statename:
+                    self.eval_statename = f"{self.eval_statename}.state"
+                episode_info = evaluate_policy_on_state(
+                    model=self.model,
+                    env=self.eval_env,
+                    n_eval_episodes=self.n_eval_episodes,
+                    render=self.render,
+                    deterministic=self.deterministic,
+                    return_episode_rewards=True,
+                    warn=self.warn,
+                    callback=self._log_success_callback,
+                    eval_statename=self.eval_statename,
+                )
+            else:
+                # eval on training state if not specified
+                episode_info = evaluate_policy(
+                    model=self.model,
+                    env=self.eval_env,
+                    n_eval_episodes=self.n_eval_episodes,
+                    render=self.render,
+                    deterministic=self.deterministic,
+                    return_episode_rewards=True,
+                    warn=self.warn,
+                    callback=self._log_success_callback,
+                )
 
             if self.log_path is not None:
                 self.evaluations_timesteps.append(self.num_timesteps)
-                self.evaluations_results.append(episode_rewards)
-                self.evaluations_length.append(episode_lengths)
+                self.evaluations_results.append(episode_info["episode_rewards"])
+                self.evaluations_length.append(episode_info["episode_lengths"])
 
                 kwargs = {}
                 # Save success log if present
@@ -182,11 +202,16 @@ class EvalCallback(EventCallback):
                     **kwargs,
                 )
 
-            mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
-            mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(
-                episode_lengths
+            mean_reward, std_reward = np.mean(episode_info["episode_rewards"]), np.std(
+                episode_info["episode_rewards"]
             )
-            mean_progress = np.mean(episode_progresses)
+            mean_ep_length, std_ep_length = np.mean(
+                episode_info["episode_lengths"]
+            ), np.std(episode_info["episode_lengths"])
+            mean_progress = np.mean(episode_info["episode_progresses"])
+            mean_laps = np.mean(episode_info["episode_laps"])
+            mean_scores = np.mean(episode_info["episode_scores"])
+
             self.last_mean_reward = mean_reward
 
             if self.verbose >= 1:
@@ -196,10 +221,13 @@ class EvalCallback(EventCallback):
                 )
                 print(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
                 print(f"Episode progress: {mean_progress}")
+                print(f"Episode score: {mean_scores}")
+                print(f"Episode laps: {mean_laps}")
             # Add to current Logger
             self.logger.record("eval/mean_reward", float(mean_reward))
             self.logger.record("eval/mean_ep_length", mean_ep_length)
             self.logger.record("eval/mean_progress", mean_progress)
+            self.logger.record("eval/mean_laps", mean_laps)
 
             if len(self._is_success_buffer) > 0:
                 success_rate = np.mean(self._is_success_buffer)

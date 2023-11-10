@@ -6,6 +6,7 @@ import retro
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv
 from gymnasium.wrappers import ResizeObservation
+from stable_baselines3.common.vec_env import SubprocVecEnv
 
 
 class Discretizer(gym.ActionWrapper):
@@ -90,7 +91,7 @@ class EncourageTricks(gym.Wrapper):
 
 class TerminateOnCrash(gym.Wrapper):
     """
-    A wrapper that ends the episode if the mean of the 
+    A wrapper that ends the episode if the mean of the
     observation is above a certain threshold.
     Also applies a penality.
     Triggered when screen turns white after crash
@@ -106,6 +107,7 @@ class TerminateOnCrash(gym.Wrapper):
         mean_obs = observation.mean()
         if mean_obs >= self.crash_restart_obs_threshold:
             terminated = True
+            truncated = True
             reward -= self.crash_penality
 
         return observation, reward, terminated, truncated, info
@@ -209,15 +211,85 @@ class NavObservation(gym.Wrapper):
 
 class PenalizeHittingWalls(gym.Wrapper):
     """
-    Penalizes the agent for 
+    Penalizes the agent for
     hitting a wall
     """
-    def __init__(self, env):
+
+    def __init__(self, env, penality: int = -5):
+        self.hit_wall_penality = penality
         super().__init__(env)
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        # TODO: make this better lol
-        if info['hit_wall'] in [101, 201, 301]:
-            reward -= 5
+        # TODO: make this better to work on all tracks
+        if info["hit_wall"] == 1:
+            reward -= self.hit_wall_penality
         return observation, reward, terminated, truncated, info
+
+
+class StochasticFrameSkip(gym.Wrapper):
+    """
+    Frameskip with randomness.
+    n: frames to skip
+    stickprob: potential to pick another action and use it instead
+    """
+
+    def __init__(self, env: gym.Env, n, stickprob):
+        gym.Wrapper.__init__(self, env)
+        self.n = n
+        self.stickprob = stickprob
+        self.curac = None
+        self.rng = np.random.RandomState()
+        self.supports_want_render = hasattr(env.unwrapped, "supports_want_render")
+
+    def reset(self, **kwargs):
+        self.curac = None
+        return self.env.reset(**kwargs)
+
+    def step(self, ac):
+        terminated = False
+        truncated = False
+        totrew = 0
+        for i in range(self.n):
+            # First step after reset, use action
+            if self.curac is None:
+                self.curac = ac
+            # First substep, delay with probability=stickprob
+            elif i == 0:
+                if self.rng.rand() > self.stickprob:
+                    self.curac = ac
+            # Second substep, new action definitely kicks in
+            elif i == 1:
+                self.curac = ac
+            if self.supports_want_render and i < self.n - 1:
+                ob, rew, terminated, truncated, info = self.env.step(
+                    self.curac,
+                    want_render=False,
+                )
+            else:
+                ob, rew, terminated, truncated, info = self.env.step(self.curac)
+            totrew += rew
+            if terminated or truncated:
+                break
+        return ob, totrew, terminated, truncated, info
+
+
+class HotWheelsWrapper(gym.Wrapper):
+    """
+    Allows access to RetroEnv.data
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def reset_emulator_data(self):
+        """
+        Resets the emulator by reseting the variables
+        and updating the RAM
+        """
+        try:  # Bare RetroEnv
+            retro_data = self.env.unwrapped.data
+        except AttributeError:  # Recursively found GameData
+            retro_data = self.get_wrapper_attr(name="data")
+        retro_data.reset()
+        retro_data.update_ram()

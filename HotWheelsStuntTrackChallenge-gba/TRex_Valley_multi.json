@@ -6,13 +6,13 @@
     },
     "hit_wall": {
       "address": 33583344,
-      "type": "><n4"
+      "type": "><n1"
     },
     "lap": {
       "address": 33583346,
       "type": "|u1"
     },
-    "my_score": {
+    "score": {
       "address": 33583624,
       "type": "<=i4"
     },

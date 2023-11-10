@@ -1,12 +1,12 @@
 
 -- By: Zack Beucler
--- single lap: (data.progress == 320)
+-- single lap: (data.progress == 320) (trex_valley)
 -- three laps: (data.progress >= 950)
 
-
 function isGameOver()
-	-- if data.progress >= 949 then
-	if data.lap >= 4 then
+	if data.progress < 0 then
+		data.progress = 342 -- 1 lap on Dino Boneyard
+	-- if data.lap >= 4 then
 		return true
 	else
 		return false
@@ -15,7 +15,7 @@ end
 
 
 function isHittingWall()
-	if data.hit_wall > 100 then
+	if data.hit_wall == 1 then
 		return true
 	else
 		return false
@@ -24,6 +24,10 @@ end
 
 
 function isDone()
+	prev_score = data.score
+	if data.score < 0 then
+		data.score = prev_score
+	end
 	return isGameOver() or isHittingWall()
 end
 

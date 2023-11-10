@@ -57,4 +57,5 @@ class VideoRecorderCallback(BaseCallback):
                 Video(th.ByteTensor([screens]), fps=40),
                 exclude=("stdout", "log", "json", "csv"),
             )
+            del screens
         return True

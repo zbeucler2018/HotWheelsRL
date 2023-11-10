@@ -1,19 +1,21 @@
 # models
 *.zip
+old_models/*
+old_models
 
 # videos
 *.mp4
+*.bk2
 
 # rom file
 *.gba
 *.sfc
 
+# spam
+.DS_Store
+
 # whl
 *.whl
-
-# testing
-test.ipynb
-test.py
 
 # tensorboard logs
 logs/

@@ -112,3 +112,13 @@ num_envs=8
   - laps
     - extracted from progress
       - 1 lap 344 (probably 345 is better but it s little over the line)  
+
+
+
+
+# New reward func
+- clipped between [-1, 1]
+- Speed makes up 30% of total reward
+- 0.7 or 1 reward for new checkpoint
+- -10 penalty for hitting wall
+    - it will be clipped to -1
