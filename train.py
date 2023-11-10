@@ -13,16 +13,16 @@ from stable_baselines3.common.vec_env import (
     VecFrameStack,
     VecTransposeImage,
 )
-from gym_wrappers import *
 from callbacks.evalAgent import EvalCallback
 import wandb
 from wandb.integration.sb3 import WandbCallback
 from utils import in_colab, parse_args, print_args
+from wrappers.hotwheels import HotWheelsWrapper
 
 
 # @print_args
 def main(args) -> None:
-    ef = max(100_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
+    ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
     print(f"Eval freq: {ef}")
     IN_COLAB = in_colab()
     print(f"Running in colab: {IN_COLAB}")

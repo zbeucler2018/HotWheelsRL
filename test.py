@@ -20,7 +20,7 @@ from stable_baselines3.common.vec_env import (
 )
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
 
-from viewer import Viewer
+from wrappers.viewer import Viewer
 
 import numpy as np
 
@@ -190,7 +190,7 @@ from utils import HotWheelsStates
 
 """
 import train_utils
-
+from wrappers.hotwheels import HotWheelsWrapper
 import retro
 
 
@@ -229,14 +229,6 @@ def main():
         )
         _ = venv.env_method(method_name="reset_emulator_data", indices=indx)
     observations = venv.reset()
-
-    # [[HotWheelsState] ->
-
-
-# def change_state(venv, statenames: [str]|[HotWheelsStates], indicies = None):
-#     for indx,t_state in enumerate(statenames):
-#         _ = venv.env_method(method_name="load_state", statename=f"{t_state}.state", indices=indx)
-#         _ = venv.env_method(method_name="reset_emulator_data", indices=indx)
 
 
 if __name__ == "__main__":

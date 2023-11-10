@@ -3,7 +3,9 @@ import retro
 from gymnasium.wrappers.time_limit import TimeLimit
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
-from gym_wrappers import *
+from wrappers.action import StochasticFrameSkip, HotWheelsDiscretizer
+from wrappers.reward import PenalizeHittingWalls
+from wrappers.hotwheels import TerminateOnCrash
 
 
 def make_retro(
