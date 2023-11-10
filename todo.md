@@ -103,7 +103,9 @@ class HotWheelsWrapper(gym.Wrapper):
             env = WarpFrame(env)     # Resize obs to 84x84xD
             env = ClipRewardEnv(env) # Clip the reward to {+1, 0, -1} by its sign
         if max_episode_steps:
-            # TRex_Valley: 5100 (1700*3) frames to complete 3 laps and lose to NPCs (4th)
+            # Timesteps to come in last vs NPCs in 3 laps
+                # TRex_Valley      :  5100 (1700*3)
+                # Dinosaur_Boneyard:  5100 (1700*3)
             env = TimeLimit(env, max_episode_steps=max_episode_steps)
 
         super().__init__(env)

@@ -46,7 +46,7 @@ def main(args) -> None:
                 method_name="load_state", statename=f"{t_state}.state", indices=indx
             )
             _ = venv.env_method(method_name="reset_emulator_data", indices=indx)
-        observations = venv.reset()
+        _ = venv.reset()
 
     # setup wandb
     _run = wandb.init(
