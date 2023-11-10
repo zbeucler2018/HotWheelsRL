@@ -6,7 +6,6 @@ from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
 from gym_wrappers import *
 
 
-
 def make_retro(
     *,
     game,

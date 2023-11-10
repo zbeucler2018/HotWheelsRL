@@ -20,7 +20,7 @@ from wandb.integration.sb3 import WandbCallback
 from utils import in_colab, parse_args, print_args
 
 
-#@print_args
+# @print_args
 def main(args) -> None:
     ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
     print(f"Eval freq: {ef}")
@@ -30,21 +30,28 @@ def main(args) -> None:
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
         env = wrap_deepmind_retro(env)
-        env = HotWheelsWrapper(env) # allows us to change to eval state
+        env = HotWheelsWrapper(env)  # allows us to change to eval state
         return env
 
     venv = VecTransposeImage(
         VecFrameStack(SubprocVecEnv([make_env] * args.num_envs), n_stack=4)
     )
 
+    if args.training_states:
+        # Need to change state AFTER adding SubProcVec because
+        # retro will throw "1 Emulator per process only" exception
+        # if applied before
+        for indx, t_state in enumerate(args.training_states):
+            _ = venv.env_method(
+                method_name="load_state", statename=f"{t_state}.state", indices=indx
+            )
+            _ = venv.env_method(method_name="reset_emulator_data", indices=indx)
+        observations = venv.reset()
+
     # setup wandb
     _run = wandb.init(
         project="sb3-hotwheels",
-        config={
-            "algorithm": "PPO",
-            "total_training_steps": args.total_steps,
-            "framestack": True,
-        },
+        config=args,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,
@@ -85,7 +92,7 @@ def main(args) -> None:
         else f"./models/{_run.name}"
     )
     wandb_callback = WandbCallback(
-        gradient_save_freq=10_000,
+        gradient_save_freq=50_000,
         model_save_path=_model_save_path,
         model_save_freq=50_000,
         verbose=1,
@@ -101,6 +108,7 @@ def main(args) -> None:
         best_model_save_path=_best_model_save_path,
         log_path=f"./logs/{_run.name}",
         eval_freq=ef,
+        eval_statename=args.evaluation_state,
         deterministic=True,
         render=True,
     )
@@ -119,28 +127,8 @@ def main(args) -> None:
 
 
 if __name__ == "__main__":
-    #parser = argparse.ArgumentParser()
-    #args = parse_args(parser)
-
-    from dataclasses import dataclass
-    from utils import HotWheelsStates
-
-    ### MOSTLY FOR DEBUGGING
-
-    @dataclass
-    class A:
-        total_steps: int
-        num_envs: int
-        game: str = "HotWheelsStuntTrackChallenge-gba"
-        state: HotWheelsStates = HotWheelsStates.TREX_VALLEY_SINGLE
-        scenario: any = None
-        resume: bool = False
-        run_id: any = None
-
-
-    args = A(
-        total_steps=5000,
-        num_envs=4
-    )
+    parser = argparse.ArgumentParser()
+    args = parse_args(parser)
+    print(args)
 
     main(args)

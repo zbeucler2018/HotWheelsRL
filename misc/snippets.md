@@ -73,3 +73,25 @@ while True:
         env.close()
         break
 ```
+
+## run subprocvec env
+```python
+def main():
+    venv = VecTransposeImage(
+        VecFrameStack(SubprocVecEnv([make_env] * args['num_envs']), n_stack=4)
+    )
+
+    observations = venv.reset()
+    for i in range(1000):
+        actions = [venv.unwrapped.action_space.sample()] * args['num_envs']
+        print(actions)
+        new_observations, rewards, dones, infos = venv.step(actions)
+
+        print(i)
+        print(f"dones: {dones}")
+        print(f"rew:   {rewards}")
+        print(f"act:   {actions}")
+        print(f"++++++++++++")
+
+    venv.close()
+```

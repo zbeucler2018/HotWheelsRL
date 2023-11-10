@@ -6,6 +6,7 @@ import retro
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv
 from gymnasium.wrappers import ResizeObservation
+from stable_baselines3.common.vec_env import SubprocVecEnv
 
 
 class Discretizer(gym.ActionWrapper):
@@ -286,8 +287,9 @@ class HotWheelsWrapper(gym.Wrapper):
         Resets the emulator by reseting the variables
         and updating the RAM
         """
-        retro_data = self.get_wrapper_attr(name="data")
+        try:  # Bare RetroEnv
+            retro_data = self.env.unwrapped.data
+        except AttributeError:  # Recursively found GameData
+            retro_data = self.get_wrapper_attr(name="data")
         retro_data.reset()
         retro_data.update_ram()
-
-

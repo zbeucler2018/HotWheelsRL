@@ -2,10 +2,10 @@ import os
 import multiprocessing
 import argparse
 import retro
-import sys
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
 import gymnasium as gym
+
 
 class HotWheelsStates(str, enum.Enum):
     """
@@ -94,6 +94,7 @@ class CLI_Args:
     model_path: str
     trim_obs: bool
     minimap_obs: bool
+    evaluation_statename: str
 
 
 def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
@@ -101,7 +102,7 @@ def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
     Parses arguments for CLI scripts
     """
     parser.add_argument("--game", default="HotWheelsStuntTrackChallenge-gba")
-    parser.add_argument("--state", default=HotWheelsStates.DEFAULT)
+    parser.add_argument("--state", default=HotWheelsStates.DEFAULT, type=str)
     parser.add_argument("--scenario", default=None)
     parser.add_argument(
         "--total_steps", help="Total steps to train", type=int, required=True
@@ -133,22 +134,38 @@ def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
         action="store_true",
     )
 
+    parser.add_argument(
+        "--evaluation_state", help="Statename to use for evaluation", type=str
+    )
+
+    parser.add_argument(
+        "--training_states",
+        help="Substates of the game state. These states must share the same data.json as the gamestate",
+        nargs="*",
+    )
+
     _args = parser.parse_args()
 
     # check for illegal resume options
     if (_args.resume or _args.run_id or _args.model_path) and not all(
         [_args.resume, _args.run_id, _args.model_path]
     ):
-        print(
+        raise Exception(
             f"--resume , --run_id , and --model_path must be defined to resume training"
         )
-        sys.exit(2)
 
     # check for illegal obs options
     if sum([_args.trim_obs, _args.minimap_obs]) > 1:
-        print(f"Only one obs flag (--trim_obs, --minimap_obs) can be used at a time")
-        sys.exit(2)
+        raise Exception(
+            f"Only one obs flag (--trim_obs, --minimap_obs) can be used at a time"
+        )
 
+    # check there is 1 training state per env
+    if not _args.training_states is None:
+        if len(_args.training_states) != _args.num_envs:
+            raise Exception(
+                f"The amount of training states ({len(_args.training_states)}) must be equal to the amount of envs ({_args.num_envs})"
+            )
     return _args
 
 

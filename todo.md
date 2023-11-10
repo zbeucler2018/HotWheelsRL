@@ -1,11 +1,11 @@
 # Todos
-- [ ] eval should use start state
+- [ x eval should use start state
     - [x] seamlessly switch from training state to eval state and back
-    - [ ] pass training states via cli
+    - [x] pass training states via cli
         - RN it just uses 232.state for all envs
-    - [ ] pass eval state via cli
+    - [x] pass eval state via cli
 - [ ] create 8 different states on the track
-- [ ] modify training vec env creation st it uses a different state per env
+- [x] modify training vec env creation st it uses a different state per env
     - eval freq cli arg (100k default || max(args.num_steps // args.num_envs, 1) )
 - [ ] adapt new project structure
 ```
