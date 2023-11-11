@@ -5,7 +5,7 @@ import retro
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
 import gymnasium as gym
-
+from dataclasses import dataclass
 
 class HotWheelsStates(str, enum.Enum):
     """
@@ -79,13 +79,23 @@ def print_args(func: callable):
     return _wrapper
 
 
-from dataclasses import dataclass
+def predict_action_prob(model, obs):
+    """
+    Returns the action probability
+    of a obs
+    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
+    """
+    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
+    dis = model.policy.get_distribution(_obs)
+    probs = dis.distribution.probs
+    probs_np = probs.detach().numpy()
+    return probs_np
 
 
 @dataclass
-class CLI_Args:
+class Config:
     game: str
-    state: HotWheelsStates
+    state: str
     scenario: str
     total_steps: int
     num_envs: int
@@ -95,9 +105,13 @@ class CLI_Args:
     trim_obs: bool
     minimap_obs: bool
     evaluation_statename: str
+    training_states: [str]
+
+    def pretty_print(self):
+        pass
 
 
-def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
+def parse_args(parser: argparse.ArgumentParser) -> Config:
     """
     Parses arguments for CLI scripts
     """
@@ -167,16 +181,3 @@ def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
                 f"The amount of training states ({len(_args.training_states)}) must be equal to the amount of envs ({_args.num_envs})"
             )
     return _args
-
-
-def predict_action_prob(model, obs):
-    """
-    Returns the action probability
-    of a obs
-    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
-    """
-    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
-    dis = model.policy.get_distribution(_obs)
-    probs = dis.distribution.probs
-    probs_np = probs.detach().numpy()
-    return probs_np

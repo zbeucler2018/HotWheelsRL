@@ -1,5 +1,5 @@
 # Todos
-- [ x eval should use start state
+- [x] eval should use start state
     - [x] seamlessly switch from training state to eval state and back
     - [x] pass training states via cli
         - RN it just uses 232.state for all envs
