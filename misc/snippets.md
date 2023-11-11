@@ -94,4 +94,8 @@ def main():
         print(f"++++++++++++")
 
     venv.close()
+
+
+if __name__ == "__main__":
+    main()
 ```
