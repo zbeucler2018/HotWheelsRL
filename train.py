@@ -5,7 +5,7 @@ Taken from: https://github.com/Farama-Foundation/stable-retro/blob/master/retro/
 """
 
 import argparse
-from train_utils import make_retro, wrap_deepmind_retro
+from train_utils import make_retro
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.vec_env import (
@@ -20,17 +20,16 @@ from utils import in_colab, parse_args, print_args
 from wrappers.hotwheels import HotWheelsWrapper
 
 
-# @print_args
+@print_args
 def main(args) -> None:
-    ef = max(5_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
+    ef = max(5_000 // args.num_envs, 1)
     print(f"Eval freq: {ef}")
     IN_COLAB = in_colab()
     print(f"Running in colab: {IN_COLAB}")
 
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
-        env = wrap_deepmind_retro(env)
-        env = HotWheelsWrapper(env)  # allows us to change to eval state
+        env = HotWheelsWrapper(env)
         return env
 
     venv = VecTransposeImage(
@@ -129,6 +128,5 @@ def main(args) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args = parse_args(parser)
-    print(args)
 
     main(args)

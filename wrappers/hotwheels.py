@@ -37,8 +37,6 @@ class HotWheelsWrapper(gym.Wrapper):
         max_episode_steps: int|None = 5_100
     ) -> None:
     
-        if not (terminate_on_crash or terminate_on_wall_crash):
-            pass
         env = FixSpeed(env)
         env = HotWheelsDiscretizer(env)
 
@@ -51,8 +49,8 @@ class HotWheelsWrapper(gym.Wrapper):
         if terminate_on_wall_crash:
             env = TerminateOnWallCrash(env)
         if use_deepmind_wrapper:
-            env = WarpFrame(env)     # Resize obs to 84x84xD
-            env = ClipRewardEnv(env) # Clip the reward to {+1, 0, -1} by its sign
+            env = WarpFrame(env)
+            env = ClipRewardEnv(env) 
         if max_episode_steps:
             # TRex_Valley: 5100 (1700*3) frames to complete 3 laps and lose to NPCs (4th)
             env = TimeLimit(env, max_episode_steps=max_episode_steps)
