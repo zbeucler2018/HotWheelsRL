@@ -8,6 +8,7 @@ import gymnasium as gym
 from dataclasses import dataclass
 from pprint import pprint
 
+
 class HotWheelsStates(str, enum.Enum):
     """
     Enviroments to put the agent into

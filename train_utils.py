@@ -2,7 +2,6 @@ from utils import HotWheelsStates
 import retro
 
 
-
 def make_retro(
     *,
     game,

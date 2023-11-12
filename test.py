@@ -7,6 +7,7 @@ from gymnasium.wrappers import (
     NormalizeObservation,
 )
 from callbacks.eval_policy import evaluate_policy
+
 # from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
@@ -25,19 +26,19 @@ from wrappers.hotwheels import HotWheelsWrapper
 def make_env():
     _game = "HotWheelsStuntTrackChallenge-gba"
     _state = HotWheelsStates.DINO_BONEYARD_MULTI
-    _rm = "human"
+    _rm = "rgb_array"
     env = train_utils.make_retro(
         game=_game, state=_state, scenario=None, render_mode=_rm
     )
     env = HotWheelsWrapper(env)  # allows us to change to eval state
-    #     env = Viewer(env)
+    env = Viewer(env)
     return env
 
 
 venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_env] * 1), n_stack=4))
 
 
-model_path = "model (11).zip"
+model_path = "best_model (4).zip"
 
 
 model = PPO.load(
@@ -51,19 +52,22 @@ model = PPO.load(
     },
 )
 
+from pprint import pprint
 
 try:
     eval_info = evaluate_policy(
         model,
         venv,
-        n_eval_episodes=2,
+        n_eval_episodes=20,
         return_episode_rewards=True,
-        deterministic=False,
+        deterministic=True,
         render=False,
     )
 
-    for key, value in eval_info.items():
-        print(f"{key}:  {np.mean(value)}")
+    pprint(eval_info)
+    # for key, value in eval_info.items():
+    #     print(f"{key}:  {np.mean(value)}")
+
 
 finally:
     venv.close()

@@ -8,7 +8,6 @@ from .action import HotWheelsDiscretizer, StochasticFrameSkip
 from .reward import PenalizeHittingWalls
 
 
-
 class HotWheelsWrapper(gym.Wrapper):
     """
     HotWheels preprocessings
@@ -34,13 +33,12 @@ class HotWheelsWrapper(gym.Wrapper):
         terminate_on_wall_crash: bool = True,
         wall_crash_reward: int = -5,
         use_deepmind_wrapper: bool = True,
-        max_episode_steps: int|None = 5_100
+        max_episode_steps: int | None = 5_100,
     ) -> None:
-    
         env = FixSpeed(env)
         env = HotWheelsDiscretizer(env)
 
-        if frame_skip > 1: # frame_skip=1 is normal env
+        if frame_skip > 1:  # frame_skip=1 is normal env
             env = StochasticFrameSkip(env, n=frame_skip, stickprob=0.25)
         if terminate_on_crash:
             env = TerminateOnCrash(env)
@@ -50,14 +48,14 @@ class HotWheelsWrapper(gym.Wrapper):
             env = TerminateOnWallCrash(env)
         if use_deepmind_wrapper:
             env = WarpFrame(env)
-            env = ClipRewardEnv(env) 
+            env = ClipRewardEnv(env)
         if max_episode_steps:
             # TRex_Valley: 5100 (1700*3) frames to complete 3 laps and lose to NPCs (4th)
             env = TimeLimit(env, max_episode_steps=max_episode_steps)
 
         # always apply a monitor as the last wrapper
-        # bc sb3's evaluate_policy() won't register 
-        # TerminateOnCrash and TerminateOnWallCrash 
+        # bc sb3's evaluate_policy() won't register
+        # TerminateOnCrash and TerminateOnWallCrash
         # bc they are wrappers and not the "true"
         # term and trunc
         env = Monitor(env)
@@ -77,7 +75,6 @@ class HotWheelsWrapper(gym.Wrapper):
         retro_data.update_ram()
 
 
-    
 class TerminateOnWallCrash(gym.Wrapper):
     """
     A wrapper that ends the episode if the agent has
