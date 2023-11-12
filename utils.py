@@ -6,6 +6,7 @@ import enum
 from stable_baselines3.common.policies import obs_as_tensor
 import gymnasium as gym
 from dataclasses import dataclass
+from pprint import pprint
 
 class HotWheelsStates(str, enum.Enum):
     """
@@ -71,8 +72,8 @@ def print_args(func: callable):
 
     def _wrapper(args):
         print("------------")
-        for k, v in args.items():
-            print(k, v)
+        attrs = vars(args)
+        pprint(attrs)
         print("------------")
         return func(args)
 

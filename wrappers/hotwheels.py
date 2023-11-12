@@ -2,14 +2,28 @@ import gymnasium as gym
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
 from gymnasium.wrappers.time_limit import TimeLimit
+import retro
 
 from .action import HotWheelsDiscretizer, StochasticFrameSkip
 from .reward import PenalizeHittingWalls
 
 
+
 class HotWheelsWrapper(gym.Wrapper):
     """
-    Allows access to RetroEnv.data
+    HotWheels preprocessings
+
+    Specifically:
+
+    * Adds Monitor
+    * Better speed calculation
+    * Makes action space discrete
+    * Stochastic Frame skipping: 4 by default at 25%
+    * Will terminate when crashing during a trick, by default
+    * Will terminate when crashing into a wall, by default
+    * Gives reward of -5 when crashing into a wall, by default
+    * Uses DeepMind-like wrappers, by default. Clip the reward to {+1, 0, -1} by its sign and resizes the obs to 84x84xD
+    * Can also add max step limit to env.
     """
 
     def __init__(
@@ -20,27 +34,35 @@ class HotWheelsWrapper(gym.Wrapper):
         terminate_on_wall_crash: bool = True,
         wall_crash_reward: int = -5,
         use_deepmind_wrapper: bool = True,
-        max_episode_steps: int|None = None
+        max_episode_steps: int|None = 5_100
     ) -> None:
     
-        env = Monitor(env)
+        if not (terminate_on_crash or terminate_on_wall_crash):
+            pass
         env = FixSpeed(env)
         env = HotWheelsDiscretizer(env)
 
         if frame_skip > 1: # frame_skip=1 is normal env
-            env = StochasticFrameSkip(n=frame_skip, stickprob=0.25)
+            env = StochasticFrameSkip(env, n=frame_skip, stickprob=0.25)
         if terminate_on_crash:
             env = TerminateOnCrash(env)
         if wall_crash_reward:
             env = PenalizeHittingWalls(env, penality=wall_crash_reward)
-        # if terminate_on_wall_crash:
-        #     env = TerminateOnWallCrash(env)
+        if terminate_on_wall_crash:
+            env = TerminateOnWallCrash(env)
         if use_deepmind_wrapper:
             env = WarpFrame(env)     # Resize obs to 84x84xD
             env = ClipRewardEnv(env) # Clip the reward to {+1, 0, -1} by its sign
         if max_episode_steps:
             # TRex_Valley: 5100 (1700*3) frames to complete 3 laps and lose to NPCs (4th)
             env = TimeLimit(env, max_episode_steps=max_episode_steps)
+
+        # always apply a monitor as the last wrapper
+        # bc sb3's evaluate_policy() won't register 
+        # TerminateOnCrash and TerminateOnWallCrash 
+        # bc they are wrappers and not the "true"
+        # term and trunc
+        env = Monitor(env)
 
         super().__init__(env)
 

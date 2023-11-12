@@ -169,8 +169,6 @@ def evaluate_policy(
                         episode_info["episode_progresses"].append(info["progress"])
                         episode_info["episode_laps"].append(info["lap"])
                         episode_info["episode_scores"].append(info["score"])
-                        # if info.get("rank", None) is not None:
-                        #     episode_info["episode_ranks"].append(info["rank"])
                     else:
                         episode_info["episode_lengths"].append(current_lengths[i])
                         episode_info["episode_rewards"].append(current_rewards[i])
