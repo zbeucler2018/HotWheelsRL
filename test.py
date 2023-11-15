@@ -15,6 +15,7 @@ from stable_baselines3.common.vec_env import (
     VecFrameStack,
     VecTransposeImage,
     DummyVecEnv,
+    VecVideoRecorder
 )
 from wrappers.viewer import Viewer
 import numpy as np
@@ -36,9 +37,11 @@ def make_env():
 
 
 venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_env] * 1), n_stack=4))
+venv = VecVideoRecorder(venv, ".",
+                       record_video_trigger=lambda x: x == 0, video_length=5100,
+                       name_prefix=f"random-agent-1")
 
-
-model_path = "best_model (4).zip"
+model_path = "model (12).zip"
 
 
 model = PPO.load(
@@ -58,7 +61,7 @@ try:
     eval_info = evaluate_policy(
         model,
         venv,
-        n_eval_episodes=20,
+        n_eval_episodes=5,
         return_episode_rewards=True,
         deterministic=True,
         render=False,

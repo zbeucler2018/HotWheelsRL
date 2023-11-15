@@ -57,7 +57,8 @@ class HotWheelsWrapper(gym.Wrapper):
         # bc sb3's evaluate_policy() won't register
         # TerminateOnCrash and TerminateOnWallCrash
         # bc they are wrappers and not the "true"
-        # term and trunc
+        # term and trunc. Another example is the
+        # TimeLimit wrapper won't register either
         env = Monitor(env)
 
         super().__init__(env)

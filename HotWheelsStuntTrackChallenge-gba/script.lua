@@ -28,7 +28,7 @@ function calculateProgressReward()
 	local current_progress = data.progress
 	local delta = 0
 	if current_progress > previous_progress then
-		delta = current_progress - previous_progress
+		delta = 1 -- current_progress - previous_progress
 		previous_progress = current_progress
 	end
 	return delta
