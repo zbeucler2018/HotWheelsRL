@@ -56,6 +56,7 @@ def main(args) -> None:
         resume=True if args.resume else None,
         id=args.run_id if args.run_id else None,
         tags=[args.state],
+        dir="./logs/wandb/",
     )
 
     if args.resume:
@@ -82,14 +83,14 @@ def main(args) -> None:
             clip_range=0.1,
             ent_coef=0.01,
             verbose=1,
-            tensorboard_log=f"./logs/{_run.name}",
+            tensorboard_log=f"./logs/tf/{_run.name}",
         )
 
     # setup callbacks
     _model_save_path = (
         f"/content/gdrive/MyDrive/HotWheelsRL/data/models/{_run.name}"
         if IN_COLAB
-        else f"./models/{_run.name}"
+        else f"./models/models/{_run.name}"
     )
     wandb_callback = WandbCallback(
         gradient_save_freq=50_000,
@@ -100,13 +101,13 @@ def main(args) -> None:
     _best_model_save_path = (
         f"/content/gdrive/MyDrive/HotWheelsRL/data/best_models/{_run.name}"
         if IN_COLAB
-        else f"./best_models/{_run.name}"
+        else f"./models/best_models/{_run.name}"
     )
 
     eval_callback = EvalCallback(
         venv,
         best_model_save_path=_best_model_save_path,
-        log_path=f"./logs/{_run.name}",
+        log_path=f"./logs/eval/{_run.name}",
         eval_freq=ef,
         eval_statename=args.evaluation_state,
         deterministic=True,
