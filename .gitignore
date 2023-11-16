@@ -3,6 +3,9 @@
 old_models/*
 old_models
 
+# vscode
+.vscode
+
 # videos
 *.mp4
 *.bk2

@@ -13,7 +13,7 @@ from stable_baselines3.common.vec_env import (
     VecFrameStack,
     VecTransposeImage,
 )
-from gym_wrappers import *
+from wrappers.hotwheels import HotWheelsWrapper
 from callbacks.evalAgent import EvalCallback
 import wandb
 from wandb.integration.sb3 import WandbCallback

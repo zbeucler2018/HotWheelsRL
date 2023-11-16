@@ -20,7 +20,7 @@ from stable_baselines3.common.vec_env import (
 )
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
 
-from viewer import Viewer
+from wrappers.viewer import Viewer
 
 import numpy as np
 
