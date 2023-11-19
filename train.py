@@ -29,7 +29,6 @@ def main(args) -> None:
 
     def make_env():
         env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
-        env = wrap_deepmind_retro(env)
         env = HotWheelsWrapper(env)  # allows us to change to eval state
         return env
 

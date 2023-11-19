@@ -25,17 +25,6 @@ def make_retro(
         render_mode=render_mode,
         **kwargs,
     )
-    env = Monitor(env)
-    env = StochasticFrameSkip(env, n=4, stickprob=0.25)
-    env = TerminateOnCrash(env)
-    env = PenalizeHittingWalls(env)
-    env = HotWheelsDiscretizer(env)
-
-    if max_episode_steps is not None:
-        # 5100 (1700*3) frames to complete 3 laps (trex valley) and be 4th vs NPCs
-        env = TimeLimit(env, max_episode_steps=max_episode_steps)
-
-    print(f"Using ", f"state: {state}.state", f"info: {state}.json", sep="\n")
     return env
 
 

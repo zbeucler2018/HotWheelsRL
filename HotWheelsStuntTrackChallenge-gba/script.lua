@@ -5,17 +5,8 @@
 
 function isGameOver()
 	if data.progress < 0 then
-		data.progress = 342 -- 1 lap on Dino Boneyard
+		--data.progress = 342 -- 1 lap on Dino Boneyard
 	-- if data.lap >= 4 then
-		return true
-	else
-		return false
-	end
-end
-
-
-function isHittingWall()
-	if data.hit_wall == 1 then
 		return true
 	else
 		return false
@@ -28,7 +19,7 @@ function isDone()
 	if data.score < 0 then
 		data.score = prev_score
 	end
-	return isGameOver() or isHittingWall()
+	return isGameOver()
 end
 
 
