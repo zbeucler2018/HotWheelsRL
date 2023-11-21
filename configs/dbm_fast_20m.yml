@@ -32,12 +32,11 @@ model:
 env:
   action_space:
     - []
-    - ["A"]
-    - ["UP"]
-    - ["DOWN"]
-    - ["LEFT"]
-    - ["RIGHT"]
-    - ["L", "R"]
+    - ["A", "UP"]
+    - ["A", "DOWN"]
+    - ["A", "LEFT"]
+    - ["A", "RIGHT"]
+    - ["A", "L", "R"]
   frame_skip: 4
   frame_skip_prob: 0.25
   terminate_on_crash: True
