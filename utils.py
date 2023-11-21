@@ -20,17 +20,21 @@ class HotWheelsStates(str, enum.Enum):
     DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"
 
 
-def predict_action_prob(model, obs):
-    """
-    Returns the action probability
-    of a obs
-    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
-    """
-    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
-    dis = model.policy.get_distribution(_obs)
-    probs = dis.distribution.probs
-    probs_np = probs.detach().numpy()
-    return probs_np
+def make_retro(
+    *,
+    game: str = "HotWheelsStuntTrackChallenge-gba",
+    state: HotWheelsStates = HotWheelsStates.DEFAULT,
+    render_mode="rgb_array",
+    **kwargs,
+):
+    env = retro.make(
+        game,
+        state=f"{state}.state",
+        info=retro.data.get_file_path(game, f"{state}.json"),
+        render_mode=render_mode,
+        **kwargs,
+    )
+    return env
 
 
 def get_retro_install_path() -> str:
@@ -97,6 +101,7 @@ def print_args(func: callable):
 @dataclass
 class Config:
     """"""
+
     # retro
     game: str = "HotWheelsStuntTrackChallenge-gba"
     state: HotWheelsStates = HotWheelsStates.DEFAULT
@@ -113,12 +118,10 @@ class Config:
     best_model_path: str = ""
     gdrive_model_path: str = ""
     gdrive_best_model_path: str = ""
-    
+
     # env
     action_space: list = None
     frame_skip: int = 4
-    
-
 
     # wrappers
     trim_obs: bool = False
@@ -147,11 +150,15 @@ def parse_args(parser: argparse.ArgumentParser) -> Config:
 
     # model
     parser.add_argument("--total_steps", help="Total steps to train")
-    parser.add_argument("--num_envs",help="Number of envs to train at the same time. Default is 5")
+    parser.add_argument(
+        "--num_envs", help="Number of envs to train at the same time. Default is 5"
+    )
     parser.add_argument("--resume", help="Resume training a model", action="store_true")
     parser.add_argument("--run_id", help="Wandb run ID to resume training a model")
     parser.add_argument("--model_path", help="Path to saved model to resume training")
-    parser.add_argument("--model_save_freq", help="Frequency to save the model in timesteps")
+    parser.add_argument(
+        "--model_save_freq", help="Frequency to save the model in timesteps"
+    )
 
     # wrappers
     parser.add_argument(
@@ -166,9 +173,7 @@ def parse_args(parser: argparse.ArgumentParser) -> Config:
     )
 
     # evaluation
-    parser.add_argument(
-        "--evaluation_state", help="Statename to use for evaluation"
-    )
+    parser.add_argument("--evaluation_state", help="Statename to use for evaluation")
     parser.add_argument(
         "--training_states",
         help="Substates of the game state. These states must share the same data.json as the gamestate",
@@ -198,7 +203,13 @@ def parse_args(parser: argparse.ArgumentParser) -> Config:
         print(_args.training_states)
         print(_args.num_envs)
         _total_t_states = len(_args.training_states)
-        print(_total_t_states, _args.num_envs, _args.num_envs == _total_t_states, type(_args.num_envs), type(_total_t_states))
+        print(
+            _total_t_states,
+            _args.num_envs,
+            _args.num_envs == _total_t_states,
+            type(_args.num_envs),
+            type(_total_t_states),
+        )
         if len(_args.training_states) != _args.num_envs:
             raise Exception(
                 f"The amount of training states ({len(_args.training_states)}) must be equal to the amount of envs ({_args.num_envs})"
@@ -207,4 +218,14 @@ def parse_args(parser: argparse.ArgumentParser) -> Config:
     return Config(_args)
 
 
-
+def predict_action_prob(model, obs):
+    """
+    Returns the action probability
+    of a obs
+    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
+    """
+    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
+    dis = model.policy.get_distribution(_obs)
+    probs = dis.distribution.probs
+    probs_np = probs.detach().numpy()
+    return probs_np
