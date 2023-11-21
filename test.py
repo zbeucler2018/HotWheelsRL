@@ -23,7 +23,7 @@ def make_env():
 venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_env] * 1), n_stack=4))
 
 
-model_path = "model(12).zip"
+model_path = "model (12).zip"
 
 
 model = PPO.load(

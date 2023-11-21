@@ -34,7 +34,7 @@ class HotWheelsWrapper(gym.Wrapper):
         env: gym.Env,
         frame_skip: int = 4,
         terminate_on_crash: bool = True,
-        terminate_on_wall_crash: bool = False,
+        terminate_on_wall_crash: bool = True,
         wall_crash_reward: int = -5,
         use_deepmind_wrapper: bool = True,
         max_episode_steps: int | None = 5_100,
@@ -158,7 +158,6 @@ class TerminateOnCrash(gym.Wrapper):
         observation, reward, terminated, truncated, info = self.env.step(action)
         mean_obs = observation.mean()
         if mean_obs >= self.crash_restart_obs_threshold:
-            print("failed trick!")
             reward -= self.crash_penality
             terminated = True
             truncated = True
@@ -178,7 +177,6 @@ class TerminateOnWallCrash(gym.Wrapper):
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
         if info['hit_wall'] == 1:
-            print("failed turn!")
             reward -= self.wall_crash_penality
             terminated = True
             truncated = True
@@ -188,7 +186,8 @@ class TerminateOnWallCrash(gym.Wrapper):
 
 class NorrmalizeBoost(gym.Wrapper):
     """
-    Normalizes the raw boost variable. True if boost is avaliable, false if not
+    Normalizes the raw boost variable. 
+    True if boost is avaliable, false if not.
     """
 
     def __init__(self, env):
