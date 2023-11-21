@@ -13,7 +13,7 @@ from stable_baselines3.common.vec_env import (
     VecTransposeImage,
 )
 from wrappers.hotwheels import HotWheelsWrapper
-from callbacks.evalAgent import EvalCallback
+from evaluation.evalCallback import EvalCallback
 import wandb
 from wandb.integration.sb3 import WandbCallback
 from utils import in_colab, parse_args, make_retro

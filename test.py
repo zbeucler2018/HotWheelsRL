@@ -1,4 +1,4 @@
-from callbacks.eval_policy import evaluate_policy
+from evaluation.eval_policy import evaluate_policy
 
 # from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3 import PPO
