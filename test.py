@@ -1,4 +1,5 @@
 from callbacks.eval_policy import evaluate_policy
+
 # from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
@@ -11,14 +12,17 @@ from stable_baselines3.common.vec_env import (
 from wrappers.viewer import Viewer
 from wrappers.hotwheels import HotWheelsWrapper
 import numpy as np
-from utils import HotWheelsStates
-from train_utils import make_retro
+from utils import HotWheelsStates, make_retro
 
 
 def make_env():
-    env = make_retro(game="HotWheelsStuntTrackChallenge-gba", state=HotWheelsStates.DINO_BONEYARD_MULTI)
+    env = make_retro(
+        game="HotWheelsStuntTrackChallenge-gba",
+        state=HotWheelsStates.DINO_BONEYARD_MULTI,
+    )
     env = HotWheelsWrapper(env)
     return env
+
 
 venv = VecTransposeImage(VecFrameStack(DummyVecEnv([make_env] * 1), n_stack=4))
 
@@ -48,9 +52,8 @@ try:
         render=True,
     )
 
-    for key,value in eval_info.items():
+    for key, value in eval_info.items():
         print(f"{key}:  {np.mean(value)} {value}")
 
 finally:
     venv.close()
-

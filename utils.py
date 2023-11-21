@@ -18,6 +18,23 @@ class HotWheelsStates(str, enum.Enum):
     DINO_BONEYARD_MULTI = "Dinosaur_Boneyard_multi"
 
 
+def make_retro(
+    *,
+    game: str = "HotWheelsStuntTrackChallenge-gba",
+    state: HotWheelsStates = HotWheelsStates.DEFAULT,
+    render_mode="rgb_array",
+    **kwargs,
+):
+    env = retro.make(
+        game,
+        state=f"{state}.state",
+        info=retro.data.get_file_path(game, f"{state}.json"),
+        render_mode=render_mode,
+        **kwargs,
+    )
+    return env
+
+
 def get_retro_install_path() -> str:
     """
     returns the install filepath of [gym,stable]-retro

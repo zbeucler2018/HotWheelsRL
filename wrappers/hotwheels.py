@@ -164,6 +164,7 @@ class TerminateOnCrash(gym.Wrapper):
 
         return observation, reward, terminated, truncated, info
 
+
 class TerminateOnWallCrash(gym.Wrapper):
     """
     A wrapper that ends the episode if the agent
@@ -176,7 +177,7 @@ class TerminateOnWallCrash(gym.Wrapper):
 
     def step(self, action):
         observation, reward, terminated, truncated, info = self.env.step(action)
-        if info['hit_wall'] == 1:
+        if info["hit_wall"] == 1:
             reward -= self.wall_crash_penality
             terminated = True
             truncated = True
@@ -186,7 +187,7 @@ class TerminateOnWallCrash(gym.Wrapper):
 
 class NorrmalizeBoost(gym.Wrapper):
     """
-    Normalizes the raw boost variable. 
+    Normalizes the raw boost variable.
     True if boost is avaliable, false if not.
     """
 

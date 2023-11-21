@@ -5,7 +5,6 @@ Taken from: https://github.com/Farama-Foundation/stable-retro/blob/master/retro/
 """
 
 import argparse
-from train_utils import make_retro, wrap_deepmind_retro
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CallbackList
 from stable_baselines3.common.vec_env import (
@@ -17,10 +16,9 @@ from wrappers.hotwheels import HotWheelsWrapper
 from callbacks.evalAgent import EvalCallback
 import wandb
 from wandb.integration.sb3 import WandbCallback
-from utils import in_colab, parse_args, print_args
+from utils import in_colab, parse_args, make_retro
 
 
-# @print_args
 def main(args) -> None:
     ef = max(100_000 // args.num_envs, 1)  # max(args.num_steps // args.num_envs, 1)
     print(f"Eval freq: {ef}")
