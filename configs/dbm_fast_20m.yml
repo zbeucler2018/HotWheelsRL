@@ -1,65 +1,60 @@
 ---
 
 
-retro:
-  game: HotWheelsStuntTrackChallenge-gba
-  state: Dinosaur_Boneyard_multi
-  scenario:
+# RetroEnv
+game: HotWheelsStuntTrackChallenge-gba
+state: Dinosaur_Boneyard_multi
 
-model:
-  total_steps: 20_000_000
-  num_envs: 5
-  resume: False
-  model_path:
-  run_id:
-  model_save_freq: 50_000
-  model_path: ./models/
-  best_model_path: ./best_models/
-  gdrive_model_path:
-  gdrive_best_model_path:
-  parameters:
-    policy: CnnPolicy
-    learning_rate: 'lambda f: f * 2.5e-4'
-    n_steps: 128
-    batch_size: 32
-    n_epochs: 4
-    gamma: 0.99
-    gae_lambda: 0.95
-    clip_range: 0.1
-    ent_coef: 0.01
+# Model
+total_steps: 20_000_000
+num_envs: 5
+resume: False
+model_save_freq: 50_000
+model_save_path: ./models/models/
+best_model_save_path: ./models/best_models/
+gdrive_model_save_path: /content/gdrive/MyDrive/HotWheelsRL/data/models/
+gdrive_best_model_save_path: /content/gdrive/MyDrive/HotWheelsRL/data/best_models/
 
-# env / wrappers
-env:
-  action_space:
-    - []
-    - ["A", "UP"]
-    - ["A", "DOWN"]
-    - ["A", "LEFT"]
-    - ["A", "RIGHT"]
-    - ["A", "L", "R"]
-  frame_skip: 4
-  frame_skip_prob: 0.25
-  terminate_on_crash: True
-  terminate_on_crash_reward: -5
-  terminate_on_wall_crash: True
-  terminate_on_wall_crash_reward: -5
-  use_deepmind_env: True
-  max_episode_steps: 5_100
-  frame_stack: 4
-  trim_obs: False
-  minimap_obs: False
+# PPO model parameters
+policy: CnnPolicy
+#learning_rate: 'lambda f: f * 2.5e-4'
+n_steps: 128
+batch_size: 32
+n_epochs: 4
+gamma: 0.99
+gae_lambda: 0.95
+clip_range: 0.1
+ent_coef: 0.01
 
-evaluation:
-  evaluation_statename: Dinosaur_Boneyard_multi
-  training_states:
-    - Dinosaur_Boneyard_multi_71
-    - Dinosaur_Boneyard_multi_156
-    - Dinosaur_Boneyard_multi_180
-    - Dinosaur_Boneyard_multi_290
-    - Dinosaur_Boneyard_multi
-  eval_freq: 200_000
-  render_eval: False
+# Env / Wrappers
+action_space:
+  - []
+  - ["A", "UP"]
+  - ["A", "DOWN"]
+  - ["A", "LEFT"]
+  - ["A", "RIGHT"]
+  - ["A", "L", "R"]
+frame_skip: 4
+frame_skip_prob: 0.25
+terminate_on_crash: True
+terminate_on_wall_crash: True
+use_deepmind_env: True
+max_episode_steps: 5_100
+frame_stack: 4
+trim_obs: False
+minimap_obs: False
 
-misc:
-  skip_wandb: False
-  file:
+# Reward
+crash_reward: -5
+wall_crash_reward: -5
+
+# Evaluation
+evaluation_statename: Dinosaur_Boneyard_multi
+training_states:
+  - Dinosaur_Boneyard_multi_71
+  - Dinosaur_Boneyard_multi_156
+  - Dinosaur_Boneyard_multi_180
+  - Dinosaur_Boneyard_multi_290
+  - Dinosaur_Boneyard_multi
+eval_freq: 200_000
+render_eval: False
