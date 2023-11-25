@@ -3,7 +3,7 @@ import numpy as np
 from gymnasium.core import Env
 
 
-class NavObservation(gym.Wrapper):
+class TrimmedObservation(gym.Wrapper):
     """
     Crops observation such that the speed dial,
     mini map, and lap/race timer are not included.

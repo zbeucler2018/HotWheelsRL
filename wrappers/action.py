@@ -32,13 +32,16 @@ class HotWheelsDiscretizer(Discretizer):
             ["A", "L", "R"],
     """
 
-    def __init__(self, env):
-        action_space = [
+    def __init__(
+        self,
+        env,
+        action_space=[
             [],
             ["A", "UP"],
             ["A", "DOWN"],
             ["A", "LEFT"],
             ["A", "RIGHT"],
             ["A", "L", "R"],
-        ]
+        ],
+    ):
         super().__init__(env=env, combos=action_space)

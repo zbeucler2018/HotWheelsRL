@@ -1,10 +1,13 @@
 import os
 import multiprocessing
 import argparse
+import pprint
 import retro
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
 import gymnasium as gym
+import yaml
+from typing import Any
 
 
 class HotWheelsStates(str, enum.Enum):
@@ -33,6 +36,19 @@ def make_retro(
         **kwargs,
     )
     return env
+
+
+def predict_action_prob(model, obs):
+    """
+    Returns the action probability
+    of a obs
+    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
+    """
+    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
+    dis = model.policy.get_distribution(_obs)
+    probs = dis.distribution.probs
+    probs_np = probs.detach().numpy()
+    return probs_np
 
 
 def get_retro_install_path() -> str:
@@ -96,104 +112,131 @@ def print_args(func: callable):
     return _wrapper
 
 
-from dataclasses import dataclass
+class Config:
+    def __init__(self, file_path: str = None):
+        # RetroEnv
+        self.game: str = "HotWheelsStuntTrackChallenge-gba"
+        self.state: str = "Dinosaur_Boneyard_multi"
+        self.scenario: str = None
 
-
-@dataclass
-class CLI_Args:
-    game: str
-    state: HotWheelsStates
-    scenario: str
-    total_steps: int
-    num_envs: int
-    resume: bool
-    run_id: str
-    model_path: str
-    trim_obs: bool
-    minimap_obs: bool
-    evaluation_statename: str
-
-
-def parse_args(parser: argparse.ArgumentParser) -> CLI_Args:
-    """
-    Parses arguments for CLI scripts
-    """
-    parser.add_argument("--game", default="HotWheelsStuntTrackChallenge-gba")
-    parser.add_argument("--state", default=HotWheelsStates.DEFAULT, type=str)
-    parser.add_argument("--scenario", default=None)
-    parser.add_argument(
-        "--total_steps", help="Total steps to train", type=int, required=True
-    )
-    parser.add_argument(
-        "--num_envs",
-        help="Number of envs to train at the same time. Default is 8",
-        type=int,
-        required=False,
-        default=8,
-    )
-
-    parser.add_argument("--resume", help="Resume training a model", action="store_true")
-    parser.add_argument(
-        "--run_id", help="Wandb run ID to resume training a model", type=str
-    )
-    parser.add_argument(
-        "--model_path", help="Path to saved model to resume training", type=str
-    )
-
-    parser.add_argument(
-        "--trim_obs",
-        help="Crop the observation such that the lap/race timers, speed dial, and minimap are not shown",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--minimap_obs",
-        help="Crop the observation so the model is given only the minimap",
-        action="store_true",
-    )
-
-    parser.add_argument(
-        "--evaluation_state", help="Statename to use for evaluation", type=str
-    )
-
-    parser.add_argument(
-        "--training_states",
-        help="Substates of the game state. These states must share the same data.json as the gamestate",
-        nargs="*",
-    )
-
-    _args = parser.parse_args()
-
-    # check for illegal resume options
-    if (_args.resume or _args.run_id or _args.model_path) and not all(
-        [_args.resume, _args.run_id, _args.model_path]
-    ):
-        raise Exception(
-            f"--resume , --run_id , and --model_path must be defined to resume training"
+        # Model
+        self.total_steps: int = 20_000_000
+        self.num_envs: int = 5
+        self.resume: bool = False
+        self.model_load_path: str = None
+        self.run_id: str = None
+        self.model_save_freq: int = 50_000
+        self.model_save_path: str = "./models/models/"
+        self.best_model_save_path: str = "./models/best_models/"
+        self.gdrive_model_save_path: str = (
+            "/content/gdrive/MyDrive/HotWheelsRL/data/models/"
+        )
+        self.gdrive_best_model_save_path: str = (
+            "/content/gdrive/MyDrive/HotWheelsRL/data/best_models/"
         )
 
-    # check for illegal obs options
-    if sum([_args.trim_obs, _args.minimap_obs]) > 1:
-        raise Exception(
-            f"Only one obs flag (--trim_obs, --minimap_obs) can be used at a time"
-        )
+        # PPO model parameters
+        self.policy: str = "CnnPolicy"
+        self.learning_rate: Any = lambda f: f * 2.5e-4
+        self.n_steps: int = 128
+        self.batch_size: int = 32
+        self.n_epochs: int = 4
+        self.gamma: float = 0.99
+        self.gae_lambda: float = 0.95
+        self.clip_range: float = 0.1
+        self.ent_coef: float = 0.01
 
-    # check there is 1 training state per env
-    if not _args.training_states is None:
-        if len(_args.training_states) != _args.num_envs:
-            raise Exception(
-                f"The amount of training states ({len(_args.training_states)}) must be equal to the amount of envs ({_args.num_envs})"
+        # Env / Wrappers
+        self.action_space: list[list[str]] = [
+            [],
+            ["A"],
+            ["UP"],
+            ["DOWN"],
+            ["LEFT"],
+            ["RIGHT"],
+            ["L", "R"],
+        ]
+        self.frame_skip: int = 4
+        self.frame_skip_prob: float = 0.25
+        self.terminate_on_crash: bool = True
+        self.terminate_on_wall_crash: bool = True
+        self.use_deepmind_env: bool = True
+        self.max_episode_steps: int = 5_100
+        self.frame_stack: int = 4
+        self.trim_obs: bool = False
+        self.minimap_obs: bool = False
+
+        # Reward
+        self.crash_reward: int = -5
+        self.wall_crash_reward: int = -5
+
+        # Evaluation
+        self.evaluation_statename: str = "Dinosaur_Boneyard_multi"
+        self.training_states: list[str] = [
+            "Dinosaur_Boneyard_multi_71",
+            "Dinosaur_Boneyard_multi_156",
+            "Dinosaur_Boneyard_multi_180",
+            "Dinosaur_Boneyard_multi_290",
+            "Dinosaur_Boneyard_multi",
+        ]
+        self.eval_freq: int = max(200_000 // self.num_envs, 1)
+        self.render_eval: bool = False
+
+        # Misc
+        self.skip_wandb: bool = False
+        self.config_file: str = None
+        self.in_colab: bool = in_colab()
+        # self.tensorflow_log_path
+        # self.wandb_log_path
+        # self.eval_log_path
+
+        if file_path:
+            self.load_file_config(file_path)
+
+        self.check_config_is_valid()
+
+    def load_file_config(self, file_path):
+        """
+        loads a given config yaml file
+        """
+        with open(file_path, "r") as file:
+            config_data = yaml.safe_load(file)
+
+        # Create class variables for each field in the config file
+        for key, value in config_data.items():
+            if key == "eval_freq":
+                setattr(self, key, max(value // self.num_envs, 1))
+            setattr(self, key, value)
+
+    def __repr__(self) -> str:
+        """
+        For a nicer print
+        """
+        properties = vars(self)
+        formatted_properties = pprint.pformat(properties, sort_dicts=False)
+        return formatted_properties
+
+    def check_config_is_valid(self) -> None:
+        """
+        Throws exception if the config doesn't meet
+        the rules below
+        """
+        # if resuming, make sure we have a defined
+        # run_id, and model_load_path too
+        if self.resume and not all([self.resume, self.run_id, self.model_load_path]):
+            raise AssertionError(
+                f"'resume' , 'run_id' , and 'model_load_path' must be defined to resume training a model."
             )
-    return _args
 
+        # Ensure only 1 obs wrapper can be used at once
+        if self.trim_obs and self.minimap_obs:
+            raise AssertionError(
+                f"Cannot use both 'trim_obs' and 'minimap_obs'. You can only use one obs wrapper at a time."
+            )
 
-def predict_action_prob(model, obs):
-    """
-    Returns the action probability
-    of a obs
-    https://stackoverflow.com/questions/66428307/how-to-get-action-propability-in-stable-baselines-3
-    """
-    _obs = obs_as_tensor(obs, model.policy.obs_to_tensor(obs)[0])
-    dis = model.policy.get_distribution(_obs)
-    probs = dis.distribution.probs
-    probs_np = probs.detach().numpy()
-    return probs_np
+        # Ensure that the amount of training states is equal
+        # to the amount of envs
+        if self.training_states and (len(self.training_states) != self.num_envs):
+            raise AssertionError(
+                f"The amount of training states ({len(self.training_states)}) must be the same as the amount of envs ({self.num_envs}) used for training."
+            )

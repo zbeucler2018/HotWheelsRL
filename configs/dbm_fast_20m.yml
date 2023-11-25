@@ -1,0 +1,60 @@
+---
+
+
+# RetroEnv
+game: HotWheelsStuntTrackChallenge-gba
+state: Dinosaur_Boneyard_multi
+
+# Model
+total_steps: 20000000
+num_envs: 5
+resume: False
+model_save_freq: 50000
+model_save_path: ./models/models/
+best_model_save_path: ./models/best_models/
+gdrive_model_save_path: /content/gdrive/MyDrive/HotWheelsRL/data/models/
+gdrive_best_model_save_path: /content/gdrive/MyDrive/HotWheelsRL/data/best_models/
+
+# PPO model parameters
+policy: CnnPolicy
+#learning_rate: 'lambda f: f * 2.5e-4'
+n_steps: 128
+batch_size: 32
+n_epochs: 4
+gamma: 0.99
+gae_lambda: 0.95
+clip_range: 0.1
+ent_coef: 0.01
+
+# Env / Wrappers
+action_space:
+  - []
+  - ["A", "UP"]
+  - ["A", "DOWN"]
+  - ["A", "LEFT"]
+  - ["A", "RIGHT"]
+  - ["A", "L", "R"]
+frame_skip: 4
+frame_skip_prob: 0.25
+terminate_on_crash: True
+terminate_on_wall_crash: True
+use_deepmind_env: True
+max_episode_steps: 5100
+frame_stack: 4
+trim_obs: False
+minimap_obs: False
+
+# Reward
+crash_reward: -5
+wall_crash_reward: -5
+
+# Evaluation
+evaluation_statename: Dinosaur_Boneyard_multi
+training_states:
+  - Dinosaur_Boneyard_multi_71
+  - Dinosaur_Boneyard_multi_156
+  - Dinosaur_Boneyard_multi_180
+  - Dinosaur_Boneyard_multi_290
+  - Dinosaur_Boneyard_multi
+eval_freq: 200000
+render_eval: False
