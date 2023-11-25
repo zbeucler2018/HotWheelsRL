@@ -6,7 +6,6 @@ import retro
 import enum
 from stable_baselines3.common.policies import obs_as_tensor
 import gymnasium as gym
-from dataclasses import dataclass
 import yaml
 from typing import Any
 

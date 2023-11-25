@@ -6,10 +6,10 @@ game: HotWheelsStuntTrackChallenge-gba
 state: Dinosaur_Boneyard_multi
 
 # Model
-total_steps: 20_000_000
+total_steps: 20000000
 num_envs: 5
 resume: False
-model_save_freq: 50_000
+model_save_freq: 50000
 model_save_path: ./models/models/
 best_model_save_path: ./models/best_models/
 gdrive_model_save_path: /content/gdrive/MyDrive/HotWheelsRL/data/models/
@@ -40,7 +40,7 @@ frame_skip_prob: 0.25
 terminate_on_crash: True
 terminate_on_wall_crash: True
 use_deepmind_env: True
-max_episode_steps: 5_100
+max_episode_steps: 5100
 frame_stack: 4
 trim_obs: False
 minimap_obs: False
@@ -57,5 +57,5 @@ training_states:
   - Dinosaur_Boneyard_multi_180
   - Dinosaur_Boneyard_multi_290
   - Dinosaur_Boneyard_multi
-eval_freq: 200_000
+eval_freq: 200000
 render_eval: False
