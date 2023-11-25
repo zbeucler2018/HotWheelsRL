@@ -55,7 +55,7 @@ def main(config: Config) -> None:
 
     # setup wandb monitoring
     _run = wandb.init(
-        project="test",#"sb3-hotwheels",
+        project="sb3-hotwheels",
         config=config,
         sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
         resume=True if config.resume else None,
