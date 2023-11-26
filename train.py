@@ -20,8 +20,6 @@ from utils import Config, make_retro
 
 
 def main(config: Config) -> None:
-
-
     def make_env():
         env = make_retro(game=config.game, state=config.state)
         env = HotWheelsWrapper(
@@ -34,12 +32,14 @@ def main(config: Config) -> None:
             crash_reward=config.crash_reward,
             wall_crash_reward=config.wall_crash_reward,
             use_deepmind_wrapper=True,
-            max_episode_steps=5_100
+            max_episode_steps=5_100,
         )
         return env
 
     venv = VecTransposeImage(
-        VecFrameStack(SubprocVecEnv([make_env] * config.num_envs), n_stack=config.frame_stack)
+        VecFrameStack(
+            SubprocVecEnv([make_env] * config.num_envs), n_stack=config.frame_stack
+        )
     )
 
     if config.training_states:
@@ -93,21 +93,19 @@ def main(config: Config) -> None:
 
     # setup callbacks
     _model_save_path = (
-        config.gdrive_model_save_path
-        if config.in_colab
-        else config.model_save_path 
+        config.gdrive_model_save_path if config.in_colab else config.model_save_path
     )
     wandb_callback = WandbCallback(
-        #gradient_save_freq=50_000,
+        # gradient_save_freq=50_000,
         model_save_path=_model_save_path + _run.name,
         model_save_freq=config.model_save_freq,
         verbose=1,
     )
-   
+
     _best_model_save_path = (
         config.gdrive_best_model_save_path
         if config.in_colab
-        else config.best_model_save_path 
+        else config.best_model_save_path
     )
     eval_callback = EvalCallback(
         venv,
