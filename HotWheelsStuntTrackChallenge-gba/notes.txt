@@ -2,6 +2,8 @@
 Integration notes
 *************************
 
+NOTE: `develop.state` is a save file of other maps and challenges in the game.
+
 
 # Game Episodes
 - Jurassic Jam

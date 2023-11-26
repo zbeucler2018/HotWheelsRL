@@ -96,6 +96,19 @@ def get_num_cpus() -> int:
     return multiprocessing.cpu_count()
 
 
+def delete_files_containing_string(search_string):
+    current_directory = os.getcwd()
+
+    for filename in os.listdir(current_directory):
+        if search_string in filename:
+            file_path = os.path.join(current_directory, filename)
+            try:
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
+
+
 def print_args(func: callable):
     """
     Decorator to print the keyword arguments
