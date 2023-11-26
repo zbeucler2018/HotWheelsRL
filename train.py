@@ -34,7 +34,7 @@ def main(config: Config) -> None:
             crash_reward=config.crash_reward,
             wall_crash_reward=config.wall_crash_reward,
             use_deepmind_wrapper=True,
-            max_episode_steps=5_1000
+            max_episode_steps=5_100
         )
         return env
 
